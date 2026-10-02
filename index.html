@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ecos del Interior — Una Exploración Filosófica</title>
+<style>
+:root, [data-theme="dark"]{
+  --bg:#0a0a0c;--bg-soft:#121216;--surface:#17171c;--surface-2:#1e1e25;
+  --border:#2a2a33;--text:#e8e6e1;--text-dim:#9a968e;--text-faint:#6b6760;
+  --accent:#c9a227;--accent-soft:#e0b84a;--accent-glow:rgba(201,162,39,.15);
+  --danger:#c25b5b;--like:#e0526a;--radius:14px;--radius-sm:8px;
+  --shadow:0 10px 40px rgba(0,0,0,.5);--overlay-bg:rgba(5,5,7,.82);
+  --header-bg:rgba(10,10,12,.82);
+  --font-serif:'Georgia','Iowan Old Style','Palatino Linotype',serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f5f3ee;--bg-soft:#ece9e2;--surface:#ffffff;--surface-2:#f9f7f3;
+  --border:#ddd8ce;--text:#1a1815;--text-dim:#5c574f;--text-faint:#8a8479;
+  --accent:#a37e0f;--accent-soft:#c9a227;--accent-glow:rgba(163,126,15,.12);
+  --danger:#b03a3a;--like:#d13a55;--shadow:0 10px 40px rgba(0,0,0,.12);
+  --overlay-bg:rgba(30,28,25,.55);--header-bg:rgba(245,243,238,.85);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;overflow-x:hidden;transition:background .35s,color .35s;cursor:none}
+[data-theme="dark"] body{background-image:radial-gradient(circle at 15% 10%,rgba(201,162,39,.06),transparent 40%),radial-gradient(circle at 85% 80%,rgba(120,80,180,.05),transparent 45%);background-attachment:fixed}
+[data-theme="light"] body{background-image:radial-gradient(circle at 15% 10%,rgba(163,126,15,.05),transparent 40%),radial-gradient(circle at 85% 80%,rgba(120,80,180,.04),transparent 45%);background-attachment:fixed}
+::selection{background:var(--accent);color:var(--bg)}
+
+.cursor-dot{position:fixed;top:0;left:0;width:8px;height:8px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .1s ease,opacity .3s;mix-blend-mode:difference}
+.cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:9998;transition:transform .15s ease,width .25s,height .25s,background .25s,opacity .3s;transform:translate(-50%,-50%);opacity:.6}
+.cursor-ring.hovering{width:60px;height:60px;background:var(--accent-glow);opacity:1}
+
+.scroll-progress{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-soft),#b8851a);z-index:9999;transition:width .1s linear;box-shadow:0 0 12px var(--accent)}
+
+.particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.particle{position:absolute;background:var(--accent);border-radius:50%;opacity:.35;filter:blur(.5px);animation:floatParticle linear infinite}
+@keyframes floatParticle{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.5}50%{transform:translate(50px,-100px) scale(1.3);opacity:.7}90%{opacity:.3}100%{transform:translate(-30px,-250px) scale(.8);opacity:0}}
+
+header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background .35s,border-color .35s}
+.header-inner{max-width:1200px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.logo{display:flex;align-items:center;gap:.7rem;cursor:pointer;user-select:none;transition:transform .3s}
+.logo:hover{transform:scale(1.04)}
+.logo-mark{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--accent-soft),var(--accent) 55%,#6b5410);display:grid;place-items:center;font-family:var(--font-serif);font-size:1.15rem;color:#0a0a0c;flex-shrink:0;position:relative;box-shadow:0 0 0 1px rgba(201,162,39,.4),0 0 22px rgba(201,162,39,.25)}
+.logo-mark::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px dashed rgba(201,162,39,.45);animation:spinRing 14s linear infinite}
+.logo-mark::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:1px solid rgba(201,162,39,.18);animation:spinRing 22s linear infinite reverse}
+@keyframes spinRing{to{transform:rotate(360deg)}}
+.logo-text{font-family:var(--font-serif);font-size:1.28rem;letter-spacing:.5px;font-weight:400;white-space:nowrap}
+.logo-text span{color:var(--accent)}
+nav{display:flex;gap:.4rem;align-items:center}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--text-dim);padding:.5rem .9rem;border-radius:var(--radius-sm);cursor:none;font-size:.88rem;font-family:var(--font-sans);transition:all .3s;position:relative;overflow:hidden}
+.nav-btn::before{content:'';position:absolute;bottom:0;left:50%;width:0;height:2px;background:var(--accent);transition:all .3s;transform:translateX(-50%)}
+.nav-btn:hover{color:var(--text);background:var(--surface);transform:translateY(-2px)}
+.nav-btn:hover::before{width:60%}
+.nav-btn.active{color:var(--accent);border-color:var(--border);background:var(--surface)}
+.nav-btn.active::before{width:80%}
+.view-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-dim);padding:.5rem .9rem;border-radius:var(--radius-sm);cursor:none;font-size:.88rem;font-family:var(--font-sans);transition:all .3s;display:inline-flex;align-items:center;gap:.4rem}
+.view-btn:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-2px)}
+.view-btn.active{background:var(--accent-glow);color:var(--accent);border-color:var(--accent)}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);cursor:none;display:grid;place-items:center;font-size:1.05rem;transition:all .35s;flex-shrink:0}
+.icon-btn:hover{color:var(--accent);border-color:var(--accent);transform:rotate(180deg) scale(1.1)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#9d7d14);color:#0a0a0c;border:none;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:600;font-size:.88rem;cursor:none;transition:all .3s;font-family:var(--font-sans);white-space:nowrap;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.25);border-radius:50%;transform:translate(-50%,-50%);transition:width .5s,height .5s}
+.btn-primary:hover::before{width:300px;height:300px}
+.btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 30px rgba(201,162,39,.45)}
+
+.hero{max-width:900px;margin:0 auto;padding:5rem 1.5rem 3.5rem;text-align:center;position:relative;z-index:1}
+.hero-eyebrow{font-size:.78rem;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem;opacity:0;animation:fadeUp .8s .1s forwards}
+.hero h1{font-family:var(--font-serif);font-size:clamp(2.3rem,6vw,4rem);font-weight:400;line-height:1.15;letter-spacing:-1px;margin-bottom:1.5rem;opacity:0;animation:fadeUp .8s .25s forwards}
+.hero h1 em{font-style:italic;color:var(--accent);display:inline-block;animation:glowPulse 4s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{text-shadow:0 0 12px rgba(201,162,39,.3)}50%{text-shadow:0 0 30px rgba(201,162,39,.7),0 0 50px rgba(201,162,39,.4)}}
+.hero p{font-size:1.08rem;color:var(--text-dim);max-width:640px;margin:0 auto 2rem;font-family:var(--font-serif);opacity:0;animation:fadeUp .8s .4s forwards}
+.hero-quote{font-family:var(--font-serif);font-style:italic;font-size:.98rem;color:var(--text-faint);border-top:1px solid var(--border);padding-top:1.6rem;max-width:520px;margin:0 auto;opacity:0;animation:fadeUp .8s .55s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+.filters{max-width:1200px;margin:0 auto;padding:0 1.5rem 1.8rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+.chip{background:var(--surface);border:1px solid var(--border);color:var(--text-dim);padding:.42rem 1rem;border-radius:40px;font-size:.82rem;cursor:none;transition:all .3s;font-family:var(--font-sans);position:relative;overflow:hidden}
+.chip:hover{color:var(--text);border-color:var(--text-faint);transform:translateY(-2px)}
+.chip.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px var(--accent-glow)}
+
+.posts-grid{max-width:1200px;margin:0 auto;padding:0 1.5rem 5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.4rem;perspective:1200px}
+.post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:none;display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .4s;position:relative;transform-style:preserve-3d;opacity:0;transform:translateY(40px)}
+.post-card.revealed{opacity:1;transform:translateY(0);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .4s}
+.post-card:hover{border-color:rgba(201,162,39,.5);box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(201,162,39,.15)}
+[data-theme="light"] .post-card:hover{box-shadow:0 25px 60px rgba(0,0,0,.15),0 0 40px rgba(163,126,15,.12)}
+.post-cover{height:150px;background-size:cover;background-position:center;position:relative;overflow:hidden;filter:saturate(.75) brightness(.72);transition:filter .5s,transform 1s cubic-bezier(.2,.8,.2,1)}
+.post-card:hover .post-cover{filter:saturate(1.15) brightness(.9);transform:scale(1.12)}
+.post-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface),transparent 65%);z-index:1}
+.post-body{padding:1.2rem 1.3rem 1.4rem;flex:1;display:flex;flex-direction:column;position:relative;z-index:2}
+.post-tag{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem;font-weight:600}
+.post-title{font-family:var(--font-serif);font-size:1.24rem;font-weight:400;line-height:1.35;margin-bottom:.7rem;color:var(--text);transition:color .3s}
+.post-card:hover .post-title{color:var(--accent-soft)}
+.post-excerpt{font-size:.9rem;color:var(--text-dim);line-height:1.65;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-meta{display:flex;align-items:center;justify-content:space-between;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.76rem;color:var(--text-faint);gap:.5rem;flex-wrap:wrap}
+.post-author{display:flex;align-items:center;gap:.5rem;min-width:0}
+.post-author span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}
+.avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6b5410);display:grid;place-items:center;font-size:.68rem;font-weight:700;color:#0a0a0c;font-family:var(--font-sans);flex-shrink:0;transition:transform .4s}
+.post-card:hover .avatar{transform:scale(1.15) rotate(-8deg)}
+.post-stats{display:flex;gap:.85rem;align-items:center;flex-shrink:0}
+.post-stats span{display:flex;align-items:center;gap:.3rem;transition:transform .3s}
+.post-card:hover .post-stats span{transform:translateY(-2px)}
+.stat-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;transition:color .2s}
+.stat-badge.liked{color:var(--like)}
+.stat-badge.liked .heart-icon{animation:heartPop .4s}
+@keyframes heartPop{0%{transform:scale(1)}50%{transform:scale(1.5)}100%{transform:scale(1)}}
+.author-badge{position:absolute;top:.8rem;right:.8rem;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);color:var(--accent);font-size:.65rem;letter-spacing:1px;text-transform:uppercase;padding:.25rem .6rem;border-radius:20px;font-weight:700;border:1px solid rgba(201,162,39,.3);z-index:3;animation:badgePulse 2.5s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,.4)}50%{box-shadow:0 0 0 8px rgba(201,162,39,0)}}
+
+/* ============ MAPA MENTAL ============ */
+.mindmap-container{
+  max-width:1300px;margin:0 auto 5rem;padding:0 1.5rem;
+  display:none;
+}
+.mindmap-container.active{display:block;animation:fadeUp .6s}
+.mindmap-header{
+  text-align:center;margin-bottom:1.5rem;
+}
+.mindmap-header h2{
+  font-family:var(--font-serif);font-size:clamp(1.6rem,4vw,2.2rem);
+  font-weight:400;margin-bottom:.5rem;
+}
+.mindmap-header h2 em{color:var(--accent);font-style:italic}
+.mindmap-header p{
+  color:var(--text-dim);font-size:.95rem;font-family:var(--font-serif);
+  max-width:640px;margin:0 auto;
+}
+.mindmap-stats{
+  display:flex;justify-content:center;gap:1.5rem;margin:1.5rem 0 1rem;
+  flex-wrap:wrap;font-size:.82rem;color:var(--text-faint);
+}
+.mindmap-stats b{color:var(--accent);font-weight:600}
+.mindmap-toolbar{
+  display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem;
+}
+.map-tool{
+  background:var(--surface);border:1px solid var(--border);color:var(--text-dim);
+  padding:.4rem .9rem;border-radius:30px;font-size:.78rem;cursor:none;
+  transition:all .25s;font-family:var(--font-sans);
+}
+.map-tool:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-2px)}
+.map-tool.active{background:var(--accent-glow);color:var(--accent);border-color:var(--accent)}
+.map-legend{
+  display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;
+  margin-top:1.2rem;font-size:.76rem;color:var(--text-faint);
+}
+.legend-item{display:flex;align-items:center;gap:.4rem}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+#mindmapCanvas{
+  width:100%;height:640px;display:block;
+  background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);
+  cursor:none;
+  box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 0 100px rgba(201,162,39,.03);
+  touch-action:none;
+}
+[data-theme="light"] #mindmapCanvas{box-shadow:0 20px 60px rgba(0,0,0,.08),inset 0 0 100px rgba(163,126,15,.02)}
+
+.map-hint{
+  text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-faint);
+  font-style:italic;
+}
+
+.overlay{position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:3rem 1.2rem;overflow-y:auto}
+.overlay.show{display:flex;animation:fadeIn .28s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:760px;width:100%;box-shadow:var(--shadow);animation:modalIn .45s cubic-bezier(.2,.8,.2,1);position:relative}
+@keyframes modalIn{from{opacity:0;transform:translateY(40px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--text-dim);cursor:none;font-size:1.15rem;display:grid;place-items:center;transition:all .3s;z-index:5}
+.modal-close:hover{color:var(--text);background:var(--surface-2);transform:rotate(90deg) scale(1.1)}
+.reader-cover{height:210px;background-size:cover;background-position:center;border-radius:var(--radius) var(--radius) 0 0;position:relative;filter:saturate(.8) brightness(.7);animation:coverPan 20s ease-in-out infinite alternate}
+@keyframes coverPan{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.reader-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface),transparent 70%);border-radius:var(--radius) var(--radius) 0 0}
+.reader-body{padding:2rem 2.2rem 2.4rem}
+.reader-tag{font-size:.7rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;font-weight:600}
+.reader-title{font-family:var(--font-serif);font-size:clamp(1.5rem,4vw,2.1rem);font-weight:400;line-height:1.25;margin-bottom:1rem}
+.reader-meta{display:flex;align-items:center;gap:.7rem;font-size:.82rem;color:var(--text-faint);margin-bottom:1.3rem;padding-bottom:1.3rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.reader-stats{display:flex;gap:1rem;font-size:.78rem;color:var(--text-faint);margin-bottom:1.6rem;flex-wrap:wrap}
+.reader-stats .stat-badge{background:var(--bg-soft);padding:.35rem .75rem;border-radius:20px;border:1px solid var(--border);transition:transform .3s}
+.reader-stats .stat-badge:hover{transform:translateY(-3px)}
+.reader-actions{display:flex;gap:.5rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.action-btn{background:var(--bg-soft);border:1px solid var(--border);color:var(--text-dim);padding:.5rem 1rem;border-radius:40px;font-size:.82rem;cursor:none;transition:all .3s;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:.4rem}
+.action-btn:hover{color:var(--text);border-color:var(--text-faint);transform:translateY(-3px) scale(1.05)}
+.action-btn.liked{color:var(--like);border-color:var(--like);background:rgba(224,82,106,.08)}
+.action-btn.danger:hover{color:var(--danger);border-color:var(--danger);background:rgba(194,91,91,.08)}
+.reader-content{font-family:var(--font-serif);font-size:1.05rem;line-height:1.85;color:var(--text);white-space:pre-wrap;word-wrap:break-word}
+[data-theme="dark"] .reader-content{color:#d8d5ce}
+.comments-section{margin-top:2.2rem;padding-top:1.8rem;border-top:1px solid var(--border)}
+.comments-title{font-family:var(--font-serif);font-size:1.1rem;margin-bottom:1.2rem;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.comments-title span{font-size:.75rem;background:var(--accent-glow);color:var(--accent);padding:.15rem .55rem;border-radius:20px;font-family:var(--font-sans);font-weight:600}
+.comment{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.9rem 1.1rem;margin-bottom:.8rem;position:relative;transition:transform .3s,border-color .3s;animation:commentIn .5s backwards}
+@keyframes commentIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+.comment:hover{transform:translateX(6px);border-color:rgba(201,162,39,.3)}
+.comment-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.comment-author{font-size:.85rem;font-weight:600;color:var(--text)}
+.comment-date{font-size:.72rem;color:var(--text-faint);margin-left:auto}
+.comment-text{font-size:.92rem;color:var(--text-dim);line-height:1.65;white-space:pre-wrap;word-wrap:break-word}
+.comment-delete{background:transparent;border:none;color:var(--text-faint);cursor:none;font-size:.75rem;padding:.15rem .4rem;border-radius:4px;transition:all .2s;margin-left:.3rem}
+.comment-delete:hover{color:var(--danger);background:rgba(194,91,91,.1);transform:rotate(90deg)}
+.comment-form{display:flex;flex-direction:column;gap:.7rem;margin-top:1.3rem}
+.input,.textarea,.select{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:.75rem 1rem;font-size:.92rem;font-family:var(--font-sans);transition:all .3s;width:100%}
+.input:focus,.textarea:focus,.select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);transform:translateY(-2px)}
+.textarea{resize:vertical;min-height:90px;line-height:1.6}
+.select{cursor:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a968e' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+.comment-form .btn-primary{align-self:flex-start}
+.composer-body{padding:2rem 2.2rem 2.4rem}
+.composer-body h2{font-family:var(--font-serif);font-size:1.5rem;font-weight:400;margin-bottom:.4rem}
+.composer-sub{font-size:.88rem;color:var(--text-faint);margin-bottom:1.6rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.78rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:.45rem;font-weight:600}
+.composer-actions{display:flex;gap:.7rem;margin-top:1.5rem;flex-wrap:wrap}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-size:.88rem;cursor:none;transition:all .3s;font-family:var(--font-sans)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text-faint);transform:translateY(-2px)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-size:.88rem;cursor:none;transition:all .3s;font-family:var(--font-sans)}
+.btn-danger:hover{background:var(--danger);color:white;transform:translateY(-2px) scale(1.03)}
+.cover-presets{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.cover-opt{width:60px;height:44px;border-radius:6px;border:2px solid transparent;cursor:none;background-size:cover;background-position:center;transition:all .35s;filter:brightness(.8)}
+.cover-opt:hover{filter:brightness(1);transform:scale(1.12) rotate(-3deg)}
+.cover-opt.selected{border-color:var(--accent);filter:brightness(1);box-shadow:0 0 0 3px var(--accent-glow)}
+.empty{grid-column:1/-1;text-align:center;padding:4rem 1rem;color:var(--text-faint)}
+.empty-icon{font-size:2.6rem;margin-bottom:1rem;opacity:.5;animation:spinSlow 8s linear infinite;display:inline-block}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+.empty p{font-family:var(--font-serif);font-size:1.05rem}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--surface-2);border:1px solid var(--accent);color:var(--text);padding:.8rem 1.5rem;border-radius:40px;font-size:.9rem;z-index:400;transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow);max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.confirm-box{max-width:420px;padding:2rem;text-align:center}
+.confirm-box h3{font-family:var(--font-serif);font-size:1.3rem;font-weight:400;margin-bottom:.7rem}
+.confirm-box p{color:var(--text-dim);font-size:.92rem;margin-bottom:1.6rem}
+.confirm-box .actions{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
+footer{border-top:1px solid var(--border);padding:2.5rem 1.5rem;text-align:center;color:var(--text-faint);font-size:.82rem;position:relative;overflow:hidden}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:shine 3s ease-in-out infinite}
+@keyframes shine{0%,100%{opacity:.3}50%{opacity:1}}
+footer .logo-text{font-size:1rem;margin-bottom:.5rem}
+
+@media (max-width:720px){
+  .header-inner{padding:.85rem 1rem;gap:.5rem}
+  .logo-text{font-size:1rem}
+  .logo-mark{width:34px;height:34px;font-size:1rem}
+  .nav-btn{padding:.45rem .6rem;font-size:.8rem}
+  .nav-btn.hide-mobile{display:none}
+  .view-btn{padding:.45rem .6rem;font-size:.78rem}
+  .view-btn span.hide-mobile{display:none}
+  .hero{padding:3.2rem 1.2rem 2.5rem}
+  .posts-grid{grid-template-columns:1fr;padding:0 1rem 4rem}
+  .reader-body{padding:1.5rem 1.4rem 2rem}
+  .composer-body{padding:1.5rem 1.4rem 2rem}
+  .overlay{padding:1.5rem .8rem}
+  .mindmap-container{padding:0 1rem}
+  #mindmapCanvas{height:480px}
+  body{cursor:auto}
+  .cursor-dot,.cursor-ring{display:none}
+  .nav-btn,.chip,.btn-primary,.icon-btn,.post-card,.action-btn,.modal-close,.btn-ghost,.btn-danger,.comment-delete,.cover-opt,.select,.view-btn,.map-tool,#mindmapCanvas{cursor:pointer}
+}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--accent),#6b5410);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="scrollTo({top:0,behavior:'smooth'})">
+      <div class="logo-mark">◉</div>
+      <div class="logo-text">Ecos <span>del</span> Interior</div>
+    </div>
+    <nav>
+      <button class="view-btn active" id="viewPosts" onclick="setView('posts')">📜 <span class="hide-mobile">Ecos</span></button>
+      <button class="view-btn" id="viewMap" onclick="setView('map')">🕸 <span class="hide-mobile">Mapa</span></button>
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <button class="btn-primary" onclick="openComposer()">+ Escribir</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="hero">
+  <div class="particles" id="particles"></div>
+  <div class="hero-eyebrow">Una Exploración Filosófica</div>
+  <h1>Un espacio para las ideas que <em>resuenan</em> en lo profundo</h1>
+  <p>Reflexiones sobre la conciencia, el dolor, la voluntad, la memoria y la búsqueda incesante de sentido. Cada texto es un eco; cada comentario, una respuesta desde otro interior.</p>
+  <div class="hero-quote">"Halla la verdad y la verdad te hará libre — pero primero hay que atreverse a buscarla."</div>
+</section>
+
+<div class="filters" id="filtersBar">
+  <button class="chip active" data-filter="todos" onclick="setFilter('todos', this)">Todos</button>
+  <button class="chip" data-filter="filosofía" onclick="setFilter('filosofía', this)">Filosofía</button>
+  <button class="chip" data-filter="psique" onclick="setFilter('psique', this)">Psique</button>
+  <button class="chip" data-filter="existencia" onclick="setFilter('existencia', this)">Existencia</button>
+  <button class="chip" data-filter="voluntad" onclick="setFilter('voluntad', this)">Voluntad</button>
+  <button class="chip" data-filter="conciencia" onclick="setFilter('conciencia', this)">Conciencia</button>
+</div>
+
+<main class="posts-grid" id="postsGrid"></main>
+
+<section class="mindmap-container" id="mindmapContainer">
+  <div class="mindmap-header">
+    <h2>Mapa <em>Mental</em> de los Ecos</h2>
+    <p>Cada nodo es un eco. Las líneas son los hilos invisibles que unen las ideas entre sí. El grafo crece automáticamente con cada nueva publicación.</p>
+  </div>
+
+  <div class="mindmap-stats" id="mindmapStats">
+    <span><b id="statPosts">0</b> ecos</span>
+    <span><b id="statConcepts">0</b> conceptos</span>
+    <span><b id="statLinks">0</b> conexiones</span>
+  </div>
+
+  <div class="mindmap-toolbar">
+    <button class="map-tool active" data-tool="all" onclick="setMapTool('all', this)">Ver todo</button>
+    <button class="map-tool" data-tool="filosofía" onclick="setMapTool('filosofía', this)">Filosofía</button>
+    <button class="map-tool" data-tool="psique" onclick="setMapTool('psique', this)">Psique</button>
+    <button class="map-tool" data-tool="existencia" onclick="setMapTool('existencia', this)">Existencia</button>
+    <button class="map-tool" data-tool="voluntad" onclick="setMapTool('voluntad', this)">Voluntad</button>
+    <button class="map-tool" data-tool="conciencia" onclick="setMapTool('conciencia', this)">Conciencia</button>
+    <button class="map-tool" onclick="resetMapView()">↻ Recentrar</button>
+  </div>
+
+  <canvas id="mindmapCanvas"></canvas>
+
+  <div class="map-legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#c9a227;box-shadow:0 0 10px #c9a227"></span> Centro</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e0b84a"></span> Categoría</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#7a9ec9"></span> Eco / Post</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#a97ac9"></span> Concepto</div>
+  </div>
+
+  <p class="map-hint">Arrastra para mover · Rueda para acercar · Clic en un nodo para abrir el eco</p>
+</section>
+
+<footer>
+  <div class="logo-text">Ecos <span style="color:var(--accent)">del</span> Interior</div>
+  <p>Un santuario digital para el pensamiento profundo · <span id="year"></span></p>
+</footer>
+
+<div class="overlay" id="readerOverlay" onclick="if(event.target===this)closeReader()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReader()">✕</button>
+    <div class="reader-cover" id="readerCover"></div>
+    <div class="reader-body">
+      <div class="reader-tag" id="readerTag"></div>
+      <h1 class="reader-title" id="readerTitle"></h1>
+      <div class="reader-meta">
+        <div class="avatar" id="readerAvatar"></div>
+        <span id="readerAuthor"></span>
+        <span>·</span>
+        <span id="readerDate"></span>
+      </div>
+      <div class="reader-stats" id="readerStats"></div>
+      <div class="reader-actions" id="readerActions"></div>
+      <div class="reader-content" id="readerContent"></div>
+      <div class="comments-section">
+        <div class="comments-title">Comentarios <span id="commentCount">0</span></div>
+        <div id="commentsList"></div>
+        <div class="comment-form">
+          <input class="input" id="commentName" placeholder="Tu nombre" maxlength="30">
+          <textarea class="textarea" id="commentText" placeholder="Comparte tu eco sobre este texto..."></textarea>
+          <button class="btn-primary" onclick="addComment()">Publicar comentario</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="composerOverlay" onclick="if(event.target===this)closeComposer()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeComposer()">✕</button>
+    <div class="composer-body">
+      <h2 id="composerTitle">Publicar un nuevo eco</h2>
+      <p class="composer-sub" id="composerSub">Comparte una reflexión, una pregunta o un fragmento de tu pensamiento.</p>
+      <div class="field"><label>Tu nombre</label><input class="input" id="newAuthor" placeholder="Anónimo" maxlength="30"></div>
+      <div class="field"><label>Título</label><input class="input" id="newTitle" placeholder="Un título que resuene..." maxlength="120"></div>
+      <div class="field"><label>Categoría</label>
+        <select class="select" id="newTag">
+          <option value="filosofía">Filosofía</option>
+          <option value="psique">Psique</option>
+          <option value="existencia">Existencia</option>
+          <option value="voluntad">Voluntad</option>
+          <option value="conciencia">Conciencia</option>
+        </select>
+      </div>
+      <div class="field"><label>Imagen de portada</label><div class="cover-presets" id="coverPresets"></div></div>
+      <div class="field"><label>Texto</label><textarea class="textarea" id="newContent" style="min-height:180px" placeholder="Escribe aquí tu reflexión..."></textarea></div>
+      <div class="composer-actions">
+        <button class="btn-primary" id="publishBtn" onclick="publishPost()">Publicar</button>
+        <button class="btn-ghost" onclick="closeComposer()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal confirm-box">
+    <h3 id="confirmTitle">¿Eliminar este eco?</h3>
+    <p id="confirmText">Esta acción no se puede deshacer.</p>
+    <div class="actions">
+      <button class="btn-danger" id="confirmYes">Sí, eliminar</button>
+      <button class="btn-ghost" onclick="closeConfirm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COVERS = [
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70',
+  'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=800&q=70',
+  'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=800&q=70',
+  'https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800&q=70',
+  'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=800&q=70',
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=70',
+  'https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=800&q=70',
+  'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=70',
+  'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=70',
+  'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800&q=70'
+];
+
+const SEED_POSTS = [
+{id:'el-juez-interior',author:'Tatakae',tag:'psique',title:'El Juez Interior: Cómo la Autoimagen Determina Nuestra Mirada',cover:COVERS[0],date:'2025-10-01',content:`El juicio que un individuo ejerce sobre los demás está directamente correlacionado con la percepción que tiene de sí mismo. Quien no posee una autoimagen pulcra y limpia tiende a ser permisivo con los defectos y falencias ajenas, ya sea por una incapacidad para discernir errores similares o por no sentirse con el derecho moral de juzgar. Por el contrario, un individuo que se percibe a sí mismo de manera positiva se inclina con mayor frecuencia a juzgar y a no pasar por alto las imperfecciones de los demás.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-trampa-del-vacio',author:'Tatakae',tag:'existencia',title:'La Trampa del Vacío: Cuando la Búsqueda de Experiencias Deshumaniza',cover:COVERS[1],date:'2025-10-01',content:`Una vez satisfechas las necesidades básicas (alimentación, protección, socialización), el individuo puede experimentar una sensación de vacío utilitario y falta de placer. Para suplir esta carencia, se embarca en una búsqueda constante de nuevas experiencias que le procuren un sentido de valor personal. Esta búsqueda, sin embargo, puede devenir en un ciclo de insatisfacción crónica, impulsando al sujeto hacia intensidades cada vez mayores que, en última instancia, pueden conducir a su deshumanización.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-herencia-invisible',author:'Tatakae',tag:'psique',title:'La Herencia Invisible: El Origen y la Perpetuación de los Prejuicios',cover:COVERS[2],date:'2025-10-01',content:`La formación de prejuicios en el individuo tiene su origen en la crianza bajo un modelo de conducta específico, ya sea familiar o socialmente adquirido. Este modelo, que dicta cómo "debe" ser y actuar una persona, se internaliza durante la juventud y se convierte en el filtro a través del cual se juzga la realidad, se piensa y se actúa, perpetuando así juicios heredados que no son cuestionados críticamente.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-espejo-del-odio',author:'Tatakae',tag:'psique',title:'El Espejo del Odio: La Aversión como Proyección de la Propia Represión',cover:COVERS[3],date:'2025-10-01',content:`El ser humano puede desarrollar aversión u odio hacia conductas o expresiones que otros manifiestan con libertad y que él mismo reprime. Esta negatividad no es hacia el otro, sino una proyección de la frustración interna; funciona como un recordatorio de la propia incapacidad o autocensura para expresar esos mismos aspectos en el contexto social.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-necesidad-de-destacar',author:'Tatakae',tag:'psique',title:'La Necesidad de Destacar: Autoverificación y la Búsqueda de la Propia Verdad',cover:COVERS[4],date:'2025-10-01',content:`El esfuerzo por destacar o sobresalir no siempre obedece a una motivación externa. Con frecuencia, está influenciado por una necesidad intrínseca de autoverificación, donde el individuo busca validar externamente la veracidad de su propia identidad y concepción del mundo. Al obtener crédito y reconocimiento por sus acciones, logra autoafirmarse y reforzar su particular "verdad".`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-paradoja-del-olvido',author:'Tatakae',tag:'psique',title:'La Paradoja del Olvido: Por Qué Forzar el Recuerdo lo Hace Eterno',cover:COVERS[5],date:'2025-10-01',content:`El proceso de olvidar deliberadamente es paradójico: al intentar activamente suprimir un pensamiento o memoria, el individuo se centra en él, recordando constantemente la razón del olvido y reforzando su vínculo con el objeto que se desea eliminar. La forma más efectiva de olvidar es, por tanto, no realizar acción consciente alguna, permitiendo que los procesos inconscientes de la mente lo releguen naturalmente.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-prision-del-dolor',author:'Tatakae',tag:'psique',title:'La Prisión del Dolor: Cómo el Sufrimiento Prolongado Limita la Experiencia Humana',cover:COVERS[6],date:'2025-10-01',content:`Cuando la experiencia vital de un individuo se ha caracterizado por un dolor prolongado y predominante, su capacidad para percibir otras sensaciones o perspectivas se ve mermada. Esta privación sensorial conduce a la normalización del sufrimiento, replicando las únicas dinámicas que conoce y limitando su repertorio de acciones humanas a lo que su experiencia dolorosa le dicta.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-insomnio-del-vacio',author:'Tatakae',tag:'psique',title:'El Insomnio del Vacío: La Ausencia de Sueño como Síntoma de una Vida Emocional Mermada',cover:COVERS[7],date:'2025-10-01',content:`El sueño cumple una función catártica esencial, permitiendo la realización onírica de deseos y angustias. La persona con psicopatía carece de muchas de estas necesidades emocionales básicas (como el miedo o la proyección a largo plazo), ya que su conducta se orienta casi exclusivamente a la satisfacción de necesidades instantáneas. Esta vacuidad interior elimina la presión que requiere liberación a través de los sueños, resultando en una ausencia casi total de la necesidad de dormir.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-mosaico-de-la-necesidad',author:'Tatakae',tag:'filosofía',title:'El Mosaico de la Necesidad: Universales Subjetivos y sus Sustitutos',cover:COVERS[8],date:'2025-10-01',content:`No existen necesidades universales absolutas, sino que cada ser posee un conjunto singular de ellas. Entre las más comunes se pueden mencionar la supervivencia, la búsqueda de placer, la verdad, el afecto y la utilidad. Estas necesidades deben ser constantemente alimentadas, ya sea de forma directa o mediante sustitutos y estímulos artificiales que las simulen.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-fortaleza-de-las-creencias',author:'Tatakae',tag:'psique',title:'La Fortaleza de las Creencias: La Defensiva como Termómetro de la Identidad',cover:COVERS[9],date:'2025-10-01',content:`La postura defensiva de un individuo es un indicador de su fidelidad a sus propias creencias. La intensidad de esta defensa es proporcional a la percepción de amenaza hacia su identidad o ideología. La flexibilidad de su pensamiento, determinada por el grado de afiliación y simpatía social que su postura conlleva, es inversamente proporcional a la rigidez de su actitud defensiva.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-forja-de-la-adversidad',author:'Tatakae',tag:'existencia',title:'La Forja de la Adversidad: Cómo la Exclusión Desarrolla una Resiliencia Superior',cover:COVERS[0],date:'2025-10-01',content:`El individuo marginado, forzado a superar adversidades constantes, desarrolla una resiliencia superior. La necesidad de enfrentar conflictos lo obliga a entrenar continuamente su mente y fuerza de voluntad, adquiriendo una competencia excepcional en la gestión de cargas emocionales y la resolución de problemas. Esta trayectoria le otorga unas bases de carácter y capacidad que están ausentes en aquellos que no han sido expuestos a tales niveles de dificultad.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-perspectiva-del-excluido',author:'Tatakae',tag:'existencia',title:'La Perspectiva del Excluido: La Exclusión como Fuente de Innovación y Visión Única',cover:COVERS[1],date:'2025-10-01',content:`Al enfrentar el desprecio y la exclusión, el marginado se ve forzado a confrontar la realidad y, al no hallar un lugar en el mundo convencional, se ve impulsado a crear uno propio, original y único. Este proceso creativo agudiza su percepción, permitiéndole discernir detalles que pasan desapercibidos para los demás. Su visión, al emanar de un marco de referencia alternativo y escaso, se convierte en una fuente de innovación particularmente atractiva y útil.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-despertar-del-dolor',author:'Tatakae',tag:'existencia',title:'El Despertar del Dolor: La Dificultad como Catalizador de la Conciencia y la Evolución',cover:COVERS[2],date:'2025-10-01',content:`La mayor parte de la conducta humana es dirigida por el estado inconsciente, donde operan instintos y procesos mentales automáticos que escapan al control consciente. Este "piloto automático" nos mantiene en una zona de conformidad que satisface placeres inmediatos, eliminando la necesidad de proyectar el futuro.
+
+La dificultad actúa como un interruptor que nos saca de este estado, forzándonos a pensar, a tomar las riendas de nuestra existencia y a proyectar. Solo mediante estos eventos disruptivos —generalmente dolorosos o emocionalmente significativos— ejercemos plenamente nuestras facultades como seres pensantes, permitiéndonos evolucionar de forma voluntaria y consciente.
+
+El dolor es, en esencia, la clave catalizadora de la evolución personal.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-muerte-de-una-verdad',author:'Tatakae',tag:'conciencia',title:'La Muerte de una Verdad: El Proceso Consciente de la Transformación Personal',cover:COVERS[3],date:'2025-10-01',content:`Los cambios físicos y mentales se desarrollan a partir de un proceso en el cual el individuo llega a la conclusión de que su forma de ser ya no le resulta adecuada. En otras palabras, se experimenta una ausencia de amor propio respecto a su propia existencia. Este cambio implica desechar la estructura mental previa, entendida como la representación interna que el individuo tenía sobre sí mismo y su realidad.
+
+Este proceso de transformación ocurre porque la estructura mental anterior pierde su validez y deja de ser una verdad para el individuo. Como base, el cambio se interpreta como una reestructuración o rediseño de esa antigua estructura mental, que ya no cumple el rol de verdad interna.
+
+Por otro lado, las personas que no experimentan este cambio se caracterizan por estar firmemente convencidas de su forma de pensar, ya que es producto de su propio deseo consciente de construcción personal y no por la influencia de factores externos.
+
+Así, el cambio refleja un proceso dinámico y consciente de renovación interior, fundamentado en la reevaluación y sustitución de creencias y percepciones que ya no se ajustan a la autenticidad del individuo.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-metrica-de-la-ausencia',author:'Tatakae',tag:'filosofía',title:'La Métrica de la Ausencia: Cómo la Privación y el Contraste Determinan el Valor',cover:COVERS[4],date:'2025-10-01',content:`El mecanismo fundamental para asignar valor genuino a algo reside en experimentar su ausencia. Este proceso se manifiesta de dos maneras: en primer término, para quien alguna vez poseyó el objeto o cualidad, la valoración emerge al experimentar la dificultad que su existencia conlleva sin ello. En segundo término, para quien lo experimenta por primera vez, la valoración nace del contraste vivido entre su estado previo y la facilidad o mejora tangible que el objeto introduce en su vida.
+
+En ambos casos, es la privación o el contraste lo que provee la métrica esencial para una apreciación profunda.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'mas-alla-de-la-reciprocidad',author:'Tatakae',tag:'filosofía',title:'Más Allá de la Reciprocidad: Un Modelo de Convivencia Basado en la Visión Compartida y el Crecimiento Individual',cover:COVERS[5],date:'2025-10-01',content:`La mayoría de las relaciones humanas se fundamentan en la correspondencia recíproca de acciones entre las personas; la ausencia o quiebra de esta correspondencia suele generar la ruptura de los vínculos. Partiendo de esta problemática central, la solución requiere establecer un modelo de convivencia que no dependa exclusivamente de la reciprocidad conductual. En este sentido, se propone adoptar una visión compartida y un estilo de vida consensuado entre las partes involucradas.
+
+Cada individuo debe aspirar a un profundo deseo de superación personal en su conducta, y en caso necesario, establecer un modelo de referencia mutuamente aceptable. Sin embargo, este modelo debe basarse en un individualismo responsable y una realización personal que no se condicione por las acciones del otro. De esta forma, cualquier error —independientemente de su origen— será evaluado únicamente a través de una autocrítica constructiva orientada hacia la mejora continua como ser racional.
+
+Bajo este enfoque, los cambios se implementan por voluntad propia, guiados por un modelo claro de comportamiento y una visión definida sobre la manera adecuada de actuar. Así, la persona no se siente atada a una obligación impuesta externamente, sino que actúa desde la propia convicción interna. En consecuencia, la relación no se sostiene sobre una estricta reciprocidad, sino sobre una congruencia común que genera satisfacción individual en cada participante.
+
+Este planteamiento no implica la ausencia de sentimientos auténticos, sino que promueve un amor propio y satisfactorio que ambas partes acuerdan mantener, brindándose apoyo mutuo en su desarrollo personal sin dependencia absoluta del otro. Se fundamenta, en última instancia, en un respeto y valoración genuina por las acciones y el ser de cada individuo.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-sombra-de-la-memoria',author:'Tatakae',tag:'psique',title:'La Sombra de la Memoria: Por Qué el Dolor se Graba a Fuego en el Recuerdo',cover:COVERS[6],date:'2025-10-01',content:`A lo largo de la vida, el ser humano experimenta diversas vivencias, tanto positivas como negativas; sin embargo, son las experiencias negativas las que suelen permanecer con mayor nitidez en la memoria. Esto se debe a que las emociones asociadas a dichos episodios actúan como factores determinantes para el almacenamiento y la consolidación de los recuerdos a largo plazo.
+
+Las emociones negativas suelen ser las más intensas, lo que explica por qué al evocarlas no solo se recuerdan con claridad, sino que también pueden provocar una reexperimentación emocional vívida del momento original. Desde una perspectiva neurocognitiva, el cerebro está constantemente en búsqueda de estímulos que generen bienestar y satisfacción; por ello, tiende a reforzar el recuerdo de experiencias placenteras y, a su vez, a mantener presentes las experiencias dolorosas para evitar su repetición futura.
+
+Este mecanismo adaptativo sugiere que la presencia o ausencia de emociones influye directamente en la capacidad de recordar. Cuando una persona intenta ignorar o reprimir sus emociones durante una experiencia, los procesos neuropsicológicos que facilitan el almacenamiento de memoria se ven afectados. Tal inhibición emocional puede desencadenar estados disociativos, donde el individuo no logra recuperar ciertos recuerdos, fenómeno conocido en psicología como amnesia disociativa.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-sombra-del-deseo',author:'Tatakae',tag:'psique',title:'La Sombra del Deseo: Cómo Todo Anhelo Alberga el Miedo a su Frustración',cover:COVERS[7],date:'2025-10-01',content:`La génesis de los deseos y los miedos es casi simultánea, aunque el deseo ostenta una primacía sutil en la conciencia del individuo. Ambos fenómenos emergen de las carencias percibidas, partiendo del principio de que solo puede anhelarse o temerse aquello que de alguna forma ya se conoce.
+
+La manifestación o latencia de los miedos está determinada por la intensidad de los deseos y por la posición existencial del individuo en un presente inmediato. El miedo se materializa como una consecuencia posterior al acto de desear, específicamente ante la frustración de no haber cumplido el anhelo o ante la amenaza potencial de su no realización.
+
+La secuencia causal —carencia, deseo y, finalmente, miedo— se estructura en la psique. Una carencia identificada en la realidad inmediata del sujeto actúa como el catalizador del deseo. Cabe acotar que no toda carencia genera inevitablemente un deseo; sin embargo, es un postulado fundamental que a todo deseo lo acompaña inherentemente su sombra: el miedo a la no materialización de lo anhelado. Este temor se erige, así, como la contraparte inseparable de toda aspiración.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-fuego-de-la-insatisfaccion',author:'Tatakae',tag:'existencia',title:'El Fuego de la Insatisfacción: El Vacío Espiritual como Origen de la Transformación y la Creación',cover:COVERS[8],date:'2025-10-01',content:`El individuo al comienzo de sus vivencias es guiado por las aspiraciones más básicas de él, en busca de satisfacción del espíritu interior. Al momento de realizarse en la sociedad no llega al estado de satisfacción plena; en consecuencia, para tratar de suplir esta necesidad busca cómo llenarlo, y en ello se hace diversas preguntas que lo transforman y se gana el desprecio del mundo.
+
+Al momento de la insatisfacción, el individuo por medio de la formulación de preguntas pretende encontrar la verdad de esa sensación.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-construccion-conceptual',author:'Tatakae',tag:'filosofía',title:'La Construcción Conceptual de lo Real',cover:COVERS[9],date:'2025-10-01',content:`Múltiples entidades permanecen imperceptibles para el sujeto hasta que este dirige su atención hacia ellas. En este sentido, la realidad se erige como objeto de estudio en sí misma, susceptible de ser sometida al escrutinio racional con el fin de develar el sustrato filosófico que la constituye.
+
+Dicho proceso permite elaborar una cartografía conceptual del entorno fenoménico. Una vez comprendida la naturaleza del objeto, se adquiere la facultad perceptiva necesaria para su transformación.
+
+En otras palabras, toda entidad resulta parcialmente invisible hasta que es descubierta y expuesta a una indagación metódica; solo entonces se alcanza la posibilidad de modificar la realidad.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'la-voluntad-como-emergente',author:'Tatakae',tag:'voluntad',title:'La Voluntad como Emergente en la Conceptualización',cover:COVERS[0],date:'2025-10-01',content:`A medida que el individuo transita y conceptualiza la realidad, surge la voluntad. Esta se intensifica conforme avanza dicha conceptualización, actuando como un instrumento de transformación del entorno.
+
+La carencia de conceptualización conlleva una atrofia progresiva de la voluntad, lo que lleva al individuo a regirse no por la voluntad de poder, sino por su dimensión instintiva e irracional, es decir, por la voluntad instintiva.
+
+Por el contrario, cuando el sujeto se halla conforme con su realidad y en un estado de satisfacción plena, la necesidad de conceptualización se desvanece. La voluntad se presenta, así, como un medio para trascender los hallazgos derivados de la conceptualización, ofreciendo un dispositivo de anclaje y resiliencia en el vasto mar de la interpretación de lo real.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'voluntad-de-poder-vs-instintiva',author:'Tatakae',tag:'voluntad',title:'Voluntad de Poder frente a Voluntad Instintiva',cover:COVERS[1],date:'2025-10-01',content:`La voluntad de poder tiende a la trascendencia de la realidad y al perfeccionamiento del individuo. En contraposición, la voluntad instintiva —ya sea de índole individual o colectiva— persigue la supervivencia y el mantenimiento de un estado de satisfacción continua.
+
+Ambas formas de voluntad coexisten en el ser humano, manteniendo entre sí una relación inversamente proporcional y antagónica.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'el-individuo-causal',author:'Tatakae',tag:'filosofía',title:'El Individuo Causal',cover:COVERS[2],date:'2025-10-01',content:`El individuo es, por naturaleza, causal: su ser se configura en función de las experiencias y contingencias que exigen una adaptación necesaria para la supervivencia. Para ello, el sujeto ha desarrollado una amplia gama de estructuras funcionales orientadas a la existencia y a la defensa.
+
+Dichos mecanismos, de carácter determinista (relación causa-efecto), operan en sinergia y se hallan conectados en un estado de armonía homeostática.`,comments:[],views:0,likes:0,likedByMe:false},
+{id:'frases-de-lo-anterior',author:'Tatakae',tag:'filosofía',title:'Frases de lo Anterior: Aforismos de Ecos del Interior',cover:COVERS[3],date:'2025-10-01',content:`1. El Juez Interior: La autoimagen dicta el juicio; una mente limpia no necesita condenar.
+
+2. La Trampa del Vacío: El vacío existencial empuja al hombre a perderse en el exceso.
+
+3. La Herencia Invisible: Los prejuicios son herencias del pasado que se disfrazan de verdad propia.
+
+4. El Espejo del Odio: Se odia en los demás la libertad que uno mismo se niega.
+
+5. La Necesidad de Destacar: El reconocimiento externo no es vanidad, es la búsqueda de la propia veracidad.
+
+6. La Paradoja del Olvido: El olvido forzado es el ancla que perpetúa el recuerdo.
+
+7. La Prisión del Dolor: El dolor prolongado no solo marca, sino que normaliza su propia existencia.
+
+8. El Insomnio del Vacío: La ausencia de sueño revela a menudo una vida interior vacía.
+
+9. El Mosaico de la Necesidad: No existen necesidades universales, solo formas distintas de llenar el vacío.
+
+10. La Fortaleza de las Creencias: La rigidez defensiva es el termómetro de una identidad frágil.
+
+11. La Forja de la Adversidad: La adversidad constante no destruye, forja una resiliencia inalcanzable para otros.
+
+12. La Perspectiva del Excluido: El marginado, al no hallar lugar, crea un mundo y una visión únicos.
+
+13. El Despertar del Dolor: El dolor es el interruptor que apaga el piloto automático de la existencia.
+
+14. La Muerte de una Verdad: Toda transformación auténtica exige la muerte de la verdad anterior.
+
+15. La Métrica de la Ausencia: La privación es la única métrica genuina para medir el valor.
+
+16. Más Allá de la Reciprocidad: El vínculo profundo no exige reciprocidad, sino una visión compartida.
+
+17. La Sombra de la Memoria: El dolor se graba a fuego en la memoria para advertir, no para castigar.
+
+18. La Sombra del Deseo: En la semilla de todo deseo yace el miedo a su propia frustración.
+
+19. El Fuego de la Insatisfacción: La insatisfacción es el fuego que quema lo viejo para crear algo nuevo.`,comments:[],views:0,likes:0,likedByMe:false}
+];
+
+/* ============================================
+   CONCEPTOS CLAVE PARA EL MAPA MENTAL
+   Cada concepto tiene palabras clave que se
+   detectan en títulos y contenido para crear
+   conexiones entre los posts.
+   ============================================ */
+const CONCEPTS = {
+  'Aislamiento': ['aislamiento','silencio','soledad','solo','solitario','marginad','excluid','encerrad'],
+  'Dolor': ['dolor','sufrimiento','sufrir','herida','lastima','padecer'],
+  'Memoria': ['memoria','recuerdo','olvido','recordar','olvidar','rememor'],
+  'Deseo': ['deseo','anhelo','ansia','aspira','querer','apetito'],
+  'Miedo': ['miedo','temor','terror','amenaza','peligro','angustia'],
+  'Voluntad': ['voluntad','volición','fuerza de voluntad','impulso','decisión'],
+  'Conciencia': ['conciencia','consciente','darse cuenta','percibir','despertar','lucidez'],
+  'Transformación': ['cambio','transforma','metamorfosis','renovación','evoluc','mutación'],
+  'Necesidad': ['necesidad','carencia','falta','vacío','escasez','privación'],
+  'Identidad': ['identidad','autoimagen','personalidad','sí mismo','ego','yo interno'],
+  'Relación': ['relación','vínculo','reciprocidad','amor','otro','convivencia'],
+  'Verdad': ['verdad','autenticidad','realidad','verdadero','sinceridad'],
+  'Creencia': ['creencia','prejuicio','ideología','filtro','dogma'],
+  'Resiliencia': ['resiliencia','adversidad','superación','resistencia','fortaleza'],
+  'Insatisfacción': ['insatisfacción','insatisfecho','descontento','desasosiego','inquietud'],
+  'Emoción': ['emoción','sentimiento','afecto','pasión','ánimo'],
+  'Cognición': ['cognición','pensamiento','razón','razonamiento','conceptualiz','análisis'],
+  'Tiempo': ['tiempo','pasado','futuro','presente','eterno','efímero']
+};
+
+/* ============================================
+   ESTADO GLOBAL
+   ============================================ */
+let posts=[];
+let currentFilter='todos';
+let currentPostId=null;
+let selectedCover=COVERS[0];
+let editingPostId=null;
+let currentUser=localStorage.getItem('ecos_username')||'';
+let currentView='posts';
+let mapTool='all';
+
+/* ============================================
+   CURSOR
+   ============================================ */
+const cursorDot=document.getElementById('cursorDot');
+const cursorRing=document.getElementById('cursorRing');
+let mouseX=0,mouseY=0,ringX=0,ringY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=e.clientX;mouseY=e.clientY;
+  cursorDot.style.transform=`translate(${mouseX-4}px,${mouseY-4}px)`;
+});
+function animateCursor(){
+  ringX+=(mouseX-ringX)*0.15;
+  ringY+=(mouseY-ringY)*0.15;
+  cursorRing.style.transform=`translate(${ringX}px,${ringY}px) translate(-50%,-50%)`;
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+setInterval(()=>{
+  document.querySelectorAll('button, a, .post-card, .comment, .chip, .cover-opt, input, textarea, select, .logo, .comment-delete, .view-btn, .map-tool').forEach(el=>{
+    if(!el.dataset.cursorBound){
+      el.dataset.cursorBound='1';
+      el.addEventListener('mouseenter',()=>cursorRing.classList.add('hovering'));
+      el.addEventListener('mouseleave',()=>cursorRing.classList.remove('hovering'));
+    }
+  });
+},800);
+
+/* ============================================
+   PROGRESO DE SCROLL
+   ============================================ */
+const scrollProgress=document.getElementById('scrollProgress');
+window.addEventListener('scroll',()=>{
+  const scrollTop=window.scrollY;
+  const docHeight=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=docHeight>0?(scrollTop/docHeight)*100:0;
+  scrollProgress.style.width=pct+'%';
+});
+
+/* ============================================
+   PARTÍCULAS
+   ============================================ */
+function createParticles(){
+  const c=document.getElementById('particles');
+  if(!c)return;
+  c.innerHTML='';
+  for(let i=0;i<25;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=Math.random()*4+1.5;
+    p.style.width=size+'px';
+    p.style.height=size+'px';
+    p.style.left=Math.random()*100+'%';
+    p.style.top=(Math.random()*100+20)+'%';
+    p.style.animationDuration=(Math.random()*15+12)+'s';
+    p.style.animationDelay=(Math.random()*10)+'s';
+    c.appendChild(p);
+  }
+}
+createParticles();
+
+/* ============================================
+   TILT
+   ============================================ */
+function attachTilt(card){
+  card.addEventListener('mousemove',e=>{
+    const rect=card.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+    const cx=rect.width/2,cy=rect.height/2;
+    const rotateX=((y-cy)/cy)*-6;
+    const rotateY=((x-cx)/cx)*6;
+    card.style.transform=`translateY(-6px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform=''});
+}
+
+/* ============================================
+   REVEAL
+   ============================================ */
+let revealObserver=null;
+function initRevealObserver(){
+  if(revealObserver)revealObserver.disconnect();
+  revealObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },{threshold:0.1,rootMargin:'0px 0px -60px 0px'});
+}
+
+/* ============================================
+   LOCALSTORAGE
+   ============================================ */
+function loadPosts(){
+  const stored=localStorage.getItem('ecos_posts_v2');
+  if(stored){
+    try{
+      posts=JSON.parse(stored);
+      posts.forEach(p=>{
+        if(typeof p.views!=='number')p.views=0;
+        if(typeof p.likes!=='number')p.likes=0;
+        if(typeof p.likedByMe!=='boolean')p.likedByMe=false;
+        if(!Array.isArray(p.comments))p.comments=[];
+      });
+      return;
+    }catch(e){}
+  }
+  posts=JSON.parse(JSON.stringify(SEED_POSTS));
+  savePosts();
+}
+function savePosts(){localStorage.setItem('ecos_posts_v2',JSON.stringify(posts))}
+
+/* ============================================
+   TEMA
+   ============================================ */
+function initTheme(){
+  const saved=localStorage.getItem('ecos_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  updateThemeIcon(saved);
+}
+function toggleTheme(){
+  const current=document.documentElement.getAttribute('data-theme');
+  const next=current==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('ecos_theme',next);
+  updateThemeIcon(next);
+  if(currentView==='map'){drawMap();}
+  showToast(next==='dark'?'Modo oscuro 🌙':'Modo claro ☀️');
+}
+function updateThemeIcon(theme){
+  const btn=document.getElementById('themeToggle');
+  if(btn)btn.textContent=theme==='dark'?'🌙':'☀️';
+}
+
+/* ============================================
+   CAMBIO DE VISTA
+   ============================================ */
+function setView(view){
+  currentView=view;
+  document.getElementById('viewPosts').classList.toggle('active',view==='posts');
+  document.getElementById('viewMap').classList.toggle('active',view==='map');
+  document.getElementById('filtersBar').style.display=view==='posts'?'flex':'none';
+  document.getElementById('postsGrid').style.display=view==='posts'?'grid':'none';
+  document.getElementById('mindmapContainer').classList.toggle('active',view==='map');
+  if(view==='map'){
+    setTimeout(()=>{resizeCanvas();buildMap();},50);
+  }
+}
+function setMapTool(tool, btn){
+  mapTool=tool;
+  document.querySelectorAll('.map-tool[data-tool]').forEach(el=>el.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  buildMap();
+}
+
+/* ============================================
+   RENDER DE POSTS
+   ============================================ */
+function renderPosts(){
+  const grid=document.getElementById('postsGrid');
+  grid.innerHTML='';
+  const filtered=currentFilter==='todos'?posts:posts.filter(p=>p.tag===currentFilter);
+  if(filtered.length===0){
+    grid.innerHTML=`<div class="empty"><div class="empty-icon">◌</div><p>Aún no hay ecos en esta categoría.</p></div>`;
+    return;
+  }
+  initRevealObserver();
+  filtered.forEach((post,i)=>{
+    const card=document.createElement('article');
+    card.className='post-card';
+    card.style.transitionDelay=(i*0.03)+'s';
+    card.onclick=()=>openReader(post.id);
+    const initial=(post.author||'A')[0].toUpperCase();
+    const isMine=currentUser&&post.author.toLowerCase()===currentUser.toLowerCase();
+    card.innerHTML=`
+      ${isMine?'<div class="author-badge">Tu eco</div>':''}
+      <div class="post-cover" style="background-image:url('${post.cover}')"></div>
+      <div class="post-body">
+        <div class="post-tag">${escapeHtml(post.tag)}</div>
+        <h2 class="post-title">${escapeHtml(post.title)}</h2>
+        <p class="post-excerpt">${escapeHtml(post.content)}</p>
+        <div class="post-meta">
+          <div class="post-author"><div class="avatar">${initial}</div><span>${escapeHtml(post.author)}</span></div>
+          <div class="post-stats">
+            <span class="stat-badge ${post.likedByMe?'liked':''}">
+              <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span>${post.likes||0}
+            </span>
+            <span>👁 ${post.views||0}</span>
+            <span>💬 ${post.comments?post.comments.length:0}</span>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+    attachTilt(card);
+    revealObserver.observe(card);
+  });
+}
+
+/* ============================================
+   LECTOR
+   ============================================ */
+function openReader(id){
+  const post=posts.find(p=>p.id===id);
+  if(!post)return;
+  currentPostId=id;
+  post.views=(post.views||0)+1;
+  savePosts();
+  document.getElementById('readerCover').style.backgroundImage=`url('${post.cover}')`;
+  document.getElementById('readerTag').textContent=post.tag;
+  document.getElementById('readerTitle').textContent=post.title;
+  document.getElementById('readerAuthor').textContent=post.author;
+  document.getElementById('readerDate').textContent=formatLongDate(post.date);
+  document.getElementById('readerAvatar').textContent=(post.author||'A')[0].toUpperCase();
+  document.getElementById('readerContent').textContent=post.content;
+  document.getElementById('readerStats').innerHTML=`
+    <span class="stat-badge">👁 ${post.views} visualizaciones</span>
+    <span class="stat-badge ${post.likedByMe?'liked':''}">
+      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes||0} me gusta
+    </span>
+    <span class="stat-badge">💬 ${post.comments?post.comments.length:0} comentarios</span>`;
+  renderReaderActions(post);
+  renderComments(post);
+  document.getElementById('readerOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+  renderPosts();
+}
+function renderReaderActions(post){
+  const c=document.getElementById('readerActions');
+  const isMine=currentUser&&post.author.toLowerCase()===currentUser.toLowerCase();
+  c.innerHTML=`
+    <button class="action-btn ${post.likedByMe?'liked':''}" onclick="toggleLike()">
+      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likedByMe?'Te gusta':'Me gusta'}
+    </button>
+    ${isMine?`
+      <button class="action-btn" onclick="openEdit('${post.id}')">✎ Editar</button>
+      <button class="action-btn danger" onclick="confirmDelete('${post.id}')">🗑 Eliminar</button>`:''}`;
+}
+function closeReader(){
+  document.getElementById('readerOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  currentPostId=null;
+}
+function toggleLike(){
+  if(!currentPostId)return;
+  const post=posts.find(p=>p.id===currentPostId);
+  if(!post)return;
+  if(post.likedByMe){post.likes=Math.max(0,(post.likes||0)-1);post.likedByMe=false}
+  else{post.likes=(post.likes||0)+1;post.likedByMe=true}
+  savePosts();
+  document.getElementById('readerStats').innerHTML=`
+    <span class="stat-badge">👁 ${post.views} visualizaciones</span>
+    <span class="stat-badge ${post.likedByMe?'liked':''}">
+      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes} me gusta
+    </span>
+    <span class="stat-badge">💬 ${post.comments?post.comments.length:0} comentarios</span>`;
+  renderReaderActions(post);
+  renderPosts();
+}
+function renderComments(post){
+  const list=document.getElementById('commentsList');
+  const countEl=document.getElementById('commentCount');
+  const comments=post.comments||[];
+  countEl.textContent=comments.length;
+  list.innerHTML='';
+  if(comments.length===0){
+    list.innerHTML=`<p style="color:var(--text-faint);font-size:.88rem;font-style:italic;margin-bottom:1rem">Sé el primero en dejar tu eco.</p>`;
+    return;
+  }
+  comments.forEach((c,idx)=>{
+    const div=document.createElement('div');
+    div.className='comment';
+    div.style.animationDelay=(idx*0.05)+'s';
+    div.innerHTML=`
+      <div class="comment-head">
+        <div class="avatar">${(c.author||'A')[0].toUpperCase()}</div>
+        <span class="comment-author">${escapeHtml(c.author)}</span>
+        <span class="comment-date">${formatDate(c.date)}</span>
+        <button class="comment-delete" title="Eliminar" onclick="event.stopPropagation();deleteComment(${idx})">✕</button>
+      </div>
+      <div class="comment-text">${escapeHtml(c.text)}</div>`;
+    list.appendChild(div);
+  });
+}
+function addComment(){
+  if(!currentPostId)return;
+  const nameInput=document.getElementById('commentName');
+  const textInput=document.getElementById('commentText');
+  const name=nameInput.value.trim()||'Anónimo';
+  const text=textInput.value.trim();
+  if(!text){showToast('Escribe algo antes de publicar.');return}
+  if(name!=='Anónimo'){currentUser=name;localStorage.setItem('ecos_username',name)}
+  const post=posts.find(p=>p.id===currentPostId);
+  if(!post.comments)post.comments=[];
+  post.comments.push({author:name,text:text,date:new Date().toISOString().slice(0,10)});
+  savePosts();
+  renderComments(post);
+  renderPosts();
+  document.getElementById('readerStats').innerHTML=`
+    <span class="stat-badge">👁 ${post.views} visualizaciones</span>
+    <span class="stat-badge ${post.likedByMe?'liked':''}">
+      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes||0} me gusta
+    </span>
+    <span class="stat-badge">💬 ${post.comments.length} comentarios</span>`;
+  textInput.value='';
+  showToast('Comentario publicado ✓');
+}
+function deleteComment(idx){
+  if(!currentPostId)return;
+  const post=posts.find(p=>p.id===currentPostId);
+  if(!post||!post.comments)return;
+  post.comments.splice(idx,1);
+  savePosts();
+  renderComments(post);
+  renderPosts();
+  showToast('Comentario eliminado');
+}
+
+/* ============================================
+   COMPOSITOR
+   ============================================ */
+function openComposer(){
+  editingPostId=null;
+  document.getElementById('composerTitle').textContent='Publicar un nuevo eco';
+  document.getElementById('composerSub').textContent='Comparte una reflexión, una pregunta o un fragmento de tu pensamiento.';
+  document.getElementById('publishBtn').textContent='Publicar';
+  document.getElementById('newAuthor').value=currentUser||'';
+  document.getElementById('newTitle').value='';
+  document.getElementById('newContent').value='';
+  document.getElementById('newTag').value='filosofía';
+  renderCoverPresets(COVERS[0]);
+  selectedCover=COVERS[0];
+  document.getElementById('composerOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function openEdit(id){
+  const post=posts.find(p=>p.id===id);
+  if(!post)return;
+  editingPostId=id;
+  document.getElementById('composerTitle').textContent='Editar eco';
+  document.getElementById('composerSub').textContent='Modifica lo que necesites. Los cambios se guardarán al publicar.';
+  document.getElementById('publishBtn').textContent='Guardar cambios';
+  document.getElementById('newAuthor').value=post.author;
+  document.getElementById('newTitle').value=post.title;
+  document.getElementById('newContent').value=post.content;
+  document.getElementById('newTag').value=post.tag;
+  selectedCover=post.cover;
+  renderCoverPresets(post.cover);
+  closeReader();
+  document.getElementById('composerOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function renderCoverPresets(selected){
+  const presets=document.getElementById('coverPresets');
+  presets.innerHTML='';
+  COVERS.forEach(url=>{
+    const div=document.createElement('div');
+    div.className='cover-opt'+(url===selected?' selected':'');
+    div.style.backgroundImage=`url('${url}')`;
+    div.onclick=()=>{
+      document.querySelectorAll('.cover-opt').forEach(el=>el.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedCover=url;
+    };
+    presets.appendChild(div);
+  });
+}
+function closeComposer(){
+  document.getElementById('composerOverlay').classList.remove('show');
+  document.body.style.overflow='';
+  editingPostId=null;
+}
+function publishPost(){
+  const author=document.getElementById('newAuthor').value.trim()||'Anónimo';
+  const title=document.getElementById('newTitle').value.trim();
+  const tag=document.getElementById('newTag').value;
+  const content=document.getElementById('newContent').value.trim();
+  if(!title||!content){showToast('El título y el texto son obligatorios.');return}
+  if(author!=='Anónimo'){currentUser=author;localStorage.setItem('ecos_username',author)}
+  if(editingPostId){
+    const post=posts.find(p=>p.id===editingPostId);
+    if(post){
+      post.author=author;post.title=title;post.tag=tag;post.content=content;post.cover=selectedCover;
+      savePosts();
+      showToast('Eco actualizado ✓');
+    }
+  }else{
+    const newPost={
+      id:'post-'+Date.now(),author,tag,title,content,cover:selectedCover,
+      date:new Date().toISOString().slice(0,10),
+      comments:[],views:0,likes:0,likedByMe:false
+    };
+    posts.unshift(newPost);
+    savePosts();
+    showToast('Tu eco ha sido publicado ✓');
+  }
+  renderPosts();
+  closeComposer();
+  if(currentView==='map'){buildMap();}
+}
+
+/* ============================================
+   ELIMINAR
+   ============================================ */
+let postToDelete=null;
+function confirmDelete(id){
+  postToDelete=id;
+  document.getElementById('confirmTitle').textContent='¿Eliminar este eco?';
+  document.getElementById('confirmText').textContent='Esta acción no se puede deshacer. Se perderán también sus comentarios y reacciones.';
+  document.getElementById('confirmYes').onclick=doDelete;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function doDelete(){
+  if(!postToDelete)return;
+  posts=posts.filter(p=>p.id!==postToDelete);
+  savePosts();
+  closeConfirm();
+  closeReader();
+  renderPosts();
+  showToast('Eco eliminado');
+  postToDelete=null;
+  if(currentView==='map'){buildMap();}
+}
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  postToDelete=null;
+}
+
+/* ============================================
+   FILTROS DE POSTS
+   ============================================ */
+function setFilter(filter){
+  currentFilter=filter;
+  document.querySelectorAll('.chip, .nav-btn[data-filter]').forEach(el=>{
+    if(el.dataset.filter===filter)el.classList.add('active');
+    else el.classList.remove('active');
+  });
+  renderPosts();
+}
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+function escapeHtml(str){
+  if(!str)return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function formatDate(iso){
+  if(!iso)return '';
+  const d=new Date(iso+'T00:00:00');
+  const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+function formatLongDate(iso){
+  if(!iso)return '';
+  const d=new Date(iso+'T00:00:00');
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${d.getDate()} de ${months[d.getMonth()]}, ${d.getFullYear()}`;
+}
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============================================
+   ============================================
+   MAPA MENTAL — FORCE-DIRECTED GRAPH
+   ============================================
+   ============================================ */
+
+const mapCanvas=document.getElementById('mindmapCanvas');
+const mapCtx=mapCanvas.getContext('2d');
+let mapNodes=[];
+let mapEdges=[];
+let mapAnimId=null;
+let mapCamera={x:0,y:0,zoom:1};
+let mapDragging=false;
+let mapLastMouse={x:0,y:0};
+let mapHoveredNode=null;
+let mapClickedNode=null;
+let mapPanStart=null;
+let mapWidth=1200,mapHeight=640;
+
+const CATEGORY_COLORS = {
+  'filosofía':'#e0b84a',
+  'psique':'#c98bb8',
+  'existencia':'#7ac9a9',
+  'voluntad':'#c98b6b',
+  'conciencia':'#8bb8c9'
+};
+
+function resizeCanvas(){
+  if(!mapCanvas)return;
+  const rect=mapCanvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  mapCanvas.width=rect.width*dpr;
+  mapCanvas.height=rect.height*dpr;
+  mapCtx.setTransform(dpr,0,0,dpr,0,0);
+  mapWidth=rect.width;
+  mapHeight=rect.height;
+}
+
+function buildMap(){
+  if(currentView!=='map')return;
+  resizeCanvas();
+
+  mapNodes=[];
+  mapEdges=[];
+
+  // Nodo central
+  const centerNode = {
+    id:'center', label:'Ecos del Interior', type:'center',
+    x:mapWidth/2, y:mapHeight/2, vx:0, vy:0, r:44
+  };
+  mapNodes.push(centerNode);
+
+  // Nodos de categoría
+  const categories = ['filosofía','psique','existencia','voluntad','conciencia'];
+  const catMap={};
+  categories.forEach((cat,i)=>{
+    const angle = (i/categories.length)*Math.PI*2 - Math.PI/2;
+    const radius = Math.min(mapWidth,mapHeight)*0.28;
+    const node = {
+      id:'cat-'+cat, label:cat, type:'category', cat:cat,
+      x: centerNode.x + Math.cos(angle)*radius,
+      y: centerNode.y + Math.sin(angle)*radius,
+      vx:0, vy:0, r:30
+    };
+    mapNodes.push(node);
+    catMap[cat]=node;
+    mapEdges.push({source:centerNode,target:node,kind:'cat'});
+  });
+
+  // Nodos de post
+  const postNodes={};
+  const postsFiltered = mapTool==='all' ? posts : posts.filter(p=>p.tag===mapTool);
+
+  postsFiltered.forEach(p=>{
+    const cat = catMap[p.tag] || centerNode;
+    const angle = Math.random()*Math.PI*2;
+    const dist = 130+Math.random()*90;
+    const node = {
+      id:'post-'+p.id, label:p.title, shortLabel:p.title.split(':')[0],
+      type:'post', postId:p.id, cat:p.tag,
+      x: cat.x + Math.cos(angle)*dist,
+      y: cat.y + Math.sin(angle)*dist,
+      vx:0, vy:0, r:16
+    };
+    mapNodes.push(node);
+    postNodes[p.id]=node;
+    mapEdges.push({source:cat,target:node,kind:'post'});
+  });
+
+  // Nodos de concepto (solo los que tienen al menos 2 conexiones)
+  const conceptMatches={};
+  Object.keys(CONCEPTS).forEach(concept=>{
+    conceptMatches[concept]=[];
+  });
+
+  postsFiltered.forEach(p=>{
+    const text = (p.title+' '+p.content).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    Object.keys(CONCEPTS).forEach(concept=>{
+      const keywords = CONCEPTS[concept];
+      const matched = keywords.some(kw=>{
+        const k = kw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        return text.includes(k);
+      });
+      if(matched){
+        conceptMatches[concept].push(p.id);
+      }
+    });
+  });
+
+  const conceptNodes={};
+  Object.keys(conceptMatches).forEach(concept=>{
+    const postIds = conceptMatches[concept];
+    if(postIds.length < 2) return;
+
+    const angle = Math.random()*Math.PI*2;
+    const dist = Math.min(mapWidth,mapHeight)*0.42;
+    const node = {
+      id:'concept-'+concept, label:concept, type:'concept',
+      x: centerNode.x + Math.cos(angle)*dist,
+      y: centerNode.y + Math.sin(angle)*dist,
+      vx:0, vy:0, r:20
+    };
+    mapNodes.push(node);
+    conceptNodes[concept]=node;
+
+    postIds.forEach(pid=>{
+      if(postNodes[pid]){
+        mapEdges.push({source:postNodes[pid],target:node,kind:'concept'});
+      }
+    });
+  });
+
+  // Estadísticas
+  document.getElementById('statPosts').textContent=postsFiltered.length;
+  document.getElementById('statConcepts').textContent=Object.keys(conceptNodes).length;
+  document.getElementById('statLinks').textContent=mapEdges.length;
+
+  // Velocidades iniciales
+  mapNodes.forEach(n=>{
+    if(n.type!=='center'){
+      n.vx=(Math.random()-0.5)*3;
+      n.vy=(Math.random()-0.5)*3;
+    }
+  });
+
+  // Ajustar cámara al centro
+  mapCamera.x=0;
+  mapCamera.y=0;
+  mapCamera.zoom=1;
+
+  // Ejecutar simulación pre-caliente
+  for(let i=0;i<180;i++) simulateMapStep(true);
+
+  if(mapAnimId) cancelAnimationFrame(mapAnimId);
+  runMapLoop();
+}
+
+function simulateMapStep(silent){
+  const repulsion = 14000;
+  const springK = 0.008;
+  const springLen = 150;
+  const damping = 0.85;
+  const centerGravity = 0.0009;
+  const maxVel = 12;
+
+  // Reset
+  mapNodes.forEach(n=>{n.fx=0;n.fy=0});
+
+  // Repulsión
+  for(let i=0;i<mapNodes.length;i++){
+    for(let j=i+1;j<mapNodes.length;j++){
+      const a=mapNodes[i],b=mapNodes[j];
+      let dx=b.x-a.x, dy=b.y-a.y;
+      let d2=dx*dx+dy*dy;
+      if(d2<1) d2=1;
+      const d=Math.sqrt(d2);
+      const f=repulsion/d2;
+      const fx=(dx/d)*f;
+      const fy=(dy/d)*f;
+      a.fx-=fx; a.fy-=fy;
+      b.fx+=fx; b.fy+=fy;
+    }
+  }
+
+  // Atracción de aristas
+  mapEdges.forEach(e=>{
+    const a=e.source, b=e.target;
+    const dx=b.x-a.x, dy=b.y-a.y;
+    const d=Math.sqrt(dx*dx+dy*dy)||1;
+    let desired=springLen;
+    if(e.kind==='cat') desired=170;
+    if(e.kind==='concept') desired=180;
+    const force=(d-desired)*springK;
+    const fx=(dx/d)*force;
+    const fy=(dy/d)*force;
+    a.fx+=fx; a.fy+=fy;
+    b.fx-=fx; b.fy-=fy;
+  });
+
+  // Gravedad al centro
+  mapNodes.forEach(n=>{
+    if(n.type==='center')return;
+    n.fx += (mapWidth/2 - n.x)*centerGravity;
+    n.fy += (mapHeight/2 - n.y)*centerGravity;
+  });
+
+  // Aplicar
+  mapNodes.forEach(n=>{
+    if(n.type==='center')return;
+    n.vx=(n.vx+n.fx)*damping;
+    n.vy=(n.vy+n.fy)*damping;
+    const sp=Math.sqrt(n.vx*n.vx+n.vy*n.vy);
+    if(sp>maxVel){n.vx=(n.vx/sp)*maxVel;n.vy=(n.vy/sp)*maxVel}
+    n.x+=n.vx;
+    n.y+=n.vy;
+  });
+}
+
+function runMapLoop(){
+  let frameCount=0;
+  function loop(){
+    frameCount++;
+    if(frameCount<200) simulateMapStep(false);
+    drawMap();
+    mapAnimId=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function drawMap(){
+  if(!mapCtx)return;
+  const theme=document.documentElement.getAttribute('data-theme');
+  const isDark=theme!=='light';
+
+  mapCtx.clearRect(0,0,mapWidth,mapHeight);
+
+  // Fondo con sutil gradiente radial
+  const bgGrad = mapCtx.createRadialGradient(mapWidth/2,mapHeight/2,0,mapWidth/2,mapHeight/2,Math.max(mapWidth,mapHeight)/1.2);
+  if(isDark){
+    bgGrad.addColorStop(0,'rgba(30,30,37,.6)');
+    bgGrad.addColorStop(1,'rgba(10,10,12,.2)');
+  }else{
+    bgGrad.addColorStop(0,'rgba(249,247,243,.8)');
+    bgGrad.addColorStop(1,'rgba(245,243,238,.3)');
+  }
+  mapCtx.fillStyle=bgGrad;
+  mapCtx.fillRect(0,0,mapWidth,mapHeight);
+
+  mapCtx.save();
+  mapCtx.translate(mapWidth/2+mapCamera.x, mapHeight/2+mapCamera.y);
+  mapCtx.scale(mapCamera.zoom,mapCamera.zoom);
+  mapCtx.translate(-mapWidth/2,-mapHeight/2);
+
+  // Aristas
+  mapEdges.forEach(e=>{
+    const a=e.source,b=e.target;
+    const isHighlighted = mapHoveredNode && (mapHoveredNode===a || mapHoveredNode===b);
+    let alpha=0.18;
+    let width=1;
+    let stroke='rgba(201,162,39,.6)';
+    if(e.kind==='cat'){alpha=0.35;width=1.5;stroke=isDark?'rgba(224,184,74,.6)':'rgba(163,126,15,.6)'}
+    if(e.kind==='concept'){alpha=0.15;width=1;stroke=isDark?'rgba(169,122,201,.5)':'rgba(150,100,180,.5)'}
+    if(isHighlighted){alpha=0.9;width=2.5;stroke=isDark?'rgba(201,162,39,.95)':'rgba(163,126,15,.95)'}
+
+    mapCtx.beginPath();
+    mapCtx.strokeStyle=stroke;
+    mapCtx.globalAlpha=alpha;
+    mapCtx.lineWidth=width;
+    mapCtx.moveTo(a.x,a.y);
+    mapCtx.lineTo(b.x,b.y);
+    mapCtx.stroke();
+  });
+  mapCtx.globalAlpha=1;
+
+  // Nodos
+  mapNodes.forEach(n=>{
+    const isHovered = mapHoveredNode===n;
+    const isRelated = mapHoveredNode && mapEdges.some(e=>(e.source===n&&e.target===mapHoveredNode)||(e.target===n&&e.source===mapHoveredNode));
+
+    let fill, stroke, textColor, glow;
+    if(n.type==='center'){
+      fill=isDark?'#c9a227':'#a37e0f';
+      stroke=isDark?'#e0b84a':'#c9a227';
+      textColor='#0a0a0c';
+      glow=isDark?'rgba(201,162,39,.7)':'rgba(163,126,15,.6)';
+    }else if(n.type==='category'){
+      fill=CATEGORY_COLORS[n.cat]||'#e0b84a';
+      stroke=isDark?'rgba(255,255,255,.3)':'rgba(0,0,0,.2)';
+      textColor='#0a0a0c';
+      glow=isDark?'rgba(224,184,74,.5)':'rgba(163,126,15,.4)';
+    }else if(n.type==='post'){
+      fill=isDark?'#7a9ec9':'#4a7ab0';
+      stroke=isDark?'rgba(122,158,201,.7)':'rgba(74,122,176,.7)';
+      textColor=isDark?'#e8e6e1':'#1a1815';
+      glow=isDark?'rgba(122,158,201,.4)':'rgba(74,122,176,.3)';
+    }else{
+      fill=isDark?'#a97ac9':'#8555a8';
+      stroke=isDark?'rgba(169,122,201,.7)':'rgba(133,85,168,.7)';
+      textColor=isDark?'#e8e6e1':'#1a1815';
+      glow=isDark?'rgba(169,122,201,.4)':'rgba(133,85,168,.3)';
+    }
+
+    // Glow
+    if(isHovered||n.type==='center'){
+      mapCtx.beginPath();
+      mapCtx.arc(n.x,n.y,n.r*1.9,0,Math.PI*2);
+      const grad=mapCtx.createRadialGradient(n.x,n.y,n.r*0.5,n.x,n.y,n.r*1.9);
+      grad.addColorStop(0,glow);
+      grad.addColorStop(1,'rgba(0,0,0,0)');
+      mapCtx.fillStyle=grad;
+      mapCtx.fill();
+    }
+
+    // Círculo
+    mapCtx.beginPath();
+    mapCtx.arc(n.x,n.y,n.r,0,Math.PI*2);
+    mapCtx.fillStyle=fill;
+    mapCtx.globalAlpha = isHovered?1:(isRelated?1:0.92);
+    mapCtx.fill();
+    mapCtx.globalAlpha=1;
+    mapCtx.lineWidth=isHovered?2.5:1.5;
+    mapCtx.strokeStyle=stroke;
+    mapCtx.stroke();
+
+    // Label
+    let fontSize;
+    if(n.type==='center') fontSize=15;
+    else if(n.type==='category') fontSize=12;
+    else if(n.type==='concept') fontSize=11;
+    else fontSize=10;
+
+    mapCtx.font = `${n.type==='center'?'bold ':''}${fontSize}px var(--font-sans), sans-serif`;
+    mapCtx.textAlign='center';
+    mapCtx.textBaseline='middle';
+
+    if(n.type==='center'||n.type==='category'){
+      mapCtx.fillStyle=textColor;
+      mapCtx.fillText(n.label,n.x,n.y);
+    }else{
+      // Etiquetas fuera del círculo para posts y conceptos
+      mapCtx.fillStyle=isDark?'#e8e6e1':'#1a1815';
+      mapCtx.globalAlpha = isHovered?1:(isRelated?0.95:0.72);
+      const label = n.type==='post' ? (n.shortLabel||n.label).slice(0,26)+(n.label.length>26?'…':'') : n.label;
+      mapCtx.fillText(label,n.x,n.y+n.r+14);
+      mapCtx.globalAlpha=1;
+    }
+  });
+
+  mapCtx.restore();
+}
+
+/* ============================================
+   INTERACCIÓN DEL MAPA
+   ============================================ */
+function getMapMouse(e){
+  const rect=mapCanvas.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const y=e.clientY-rect.top;
+  // Convertir a coords del mundo
+  const wx = (x - mapWidth/2 - mapCamera.x)/mapCamera.zoom + mapWidth/2;
+  const wy = (y - mapHeight/2 - mapCamera.y)/mapCamera.zoom + mapHeight/2;
+  return {x,y,wx,wy};
+}
+
+mapCanvas.addEventListener('mousedown',e=>{
+  const {x,y}=getMapMouse(e);
+  const hit = hitTestNode(x,y);
+  if(hit){
+    mapClickedNode=hit;
+  }else{
+    mapDragging=true;
+    mapLastMouse={x:e.clientX,y:e.clientY};
+  }
+});
+
+mapCanvas.addEventListener('mousemove',e=>{
+  const {x,y}=getMapMouse(e);
+  if(mapDragging){
+    const dx=e.clientX-mapLastMouse.x;
+    const dy=e.clientY-mapLastMouse.y;
+    mapCamera.x+=dx;
+    mapCamera.y+=dy;
+    mapLastMouse={x:e.clientX,y:e.clientY};
+    return;
+  }
+  const hit = hitTestNode(x,y);
+  mapHoveredNode = hit;
+  mapCanvas.style.cursor = hit?'pointer':'grab';
+});
+
+mapCanvas.addEventListener('mouseup',e=>{
+  const {x,y}=getMapMouse(e);
+  const hit = hitTestNode(x,y);
+  if(hit && mapClickedNode===hit){
+    if(hit.type==='post'&&hit.postId){
+      openReader(hit.postId);
+    }
+  }
+  mapClickedNode=null;
+  mapDragging=false;
+});
+
+mapCanvas.addEventListener('mouseleave',()=>{
+  mapDragging=false;
+  mapClickedNode=null;
+});
+
+mapCanvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const zoomFactor = e.deltaY<0 ? 1.12 : 0.9;
+  mapCamera.zoom = Math.max(0.35, Math.min(2.5, mapCamera.zoom*zoomFactor));
+},{passive:false});
+
+function hitTestNode(sx,sy){
+  // Convertir coords de pantalla a coords del mundo del grafo
+  const wx = (sx - mapWidth/2 - mapCamera.x)/mapCamera.zoom + mapWidth/2;
+  const wy = (sy - mapHeight/2 - mapCamera.y)/mapCamera.zoom + mapHeight/2;
+  for(let i=mapNodes.length-1;i>=0;i--){
+    const n=mapNodes[i];
+    const dx=wx-n.x, dy=wy-n.y;
+    if(dx*dx+dy*dy <= (n.r+4)*(n.r+4)) return n;
+  }
+  return null;
+}
+
+function resetMapView(){
+  mapCamera.x=0;mapCamera.y=0;mapCamera.zoom=1;
+  buildMap();
+  showToast('Vista recentrada');
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+initTheme();
+document.getElementById('year').textContent=new Date().getFullYear();
+if(currentUser){
+  setTimeout(()=>{
+    const cn=document.getElementById('commentName');
+    if(cn)cn.value=currentUser;
+  },100);
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeReader();closeComposer();closeConfirm();}
+});
+loadPosts();
+renderPosts();
+window.addEventListener('resize',()=>{
+  if(currentView==='map'){resizeCanvas();}
+});
+</script>
+</body>
+</html>
