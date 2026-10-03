@@ -41,7 +41,7 @@ body.landing-active{overflow:hidden}
 @keyframes floatParticle{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.5}50%{transform:translate(50px,-100px) scale(1.3);opacity:.7}90%{opacity:.3}100%{transform:translate(-30px,-250px) scale(.8);opacity:0}}
 
 /* ============================================
-   LANDING
+   LANDING (z-index: 1000)
    ============================================ */
 .landing{
   position:fixed;top:0;left:0;right:0;bottom:0;
@@ -50,7 +50,7 @@ body.landing-active{overflow:hidden}
   z-index:1000;background:var(--bg);
   display:flex;align-items:center;justify-content:center;
   padding:1.2rem;overflow:hidden;
-  transition:opacity .5s, visibility .5s;margin:0;
+  transition:opacity .4s, visibility .4s;margin:0;
 }
 .landing.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .landing::before{
@@ -102,7 +102,7 @@ body.landing-active{overflow:hidden}
 /* ============================================
    APP
    ============================================ */
-.app{opacity:0;transition:opacity .5s .2s}
+.app{opacity:0;transition:opacity .4s .1s}
 .app.visible{opacity:1}
 
 header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
@@ -185,79 +185,44 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ============================================
-   MODAL DE CONTRASEÑA — DISEÑO IDÉNTICO A LA IMAGEN
+   OVERLAY (z-index 3000 — ENCIMA DE TODO)
    ============================================ */
 .overlay{
-  position:fixed;inset:0;background:var(--overlay-bg);
-  z-index:200;display:none;
+  position:fixed;inset:0;
+  background:var(--overlay-bg);
+  z-index:3000; /* CRUCIAL: por encima de la landing (1000) */
+  display:none;
   align-items:center;justify-content:center;
   padding:1.5rem 1rem;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
+  transition:none !important;
 }
-.overlay.show{display:flex}
+.overlay.show{display:flex !important}
 
-/* Modal de rol: pequeño, centrado, estilo imagen */
+/* Modal de rol — diseño idéntico a la imagen */
 .role-modal{
-  max-width:360px;
-  width:100%;
+  max-width:360px;width:100%;
   padding:1.8rem 1.6rem 1.5rem;
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:18px;
   box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(201,162,39,.08);
-  text-align:center;
-  position:relative;
-  margin:auto;
+  text-align:center;position:relative;margin:auto;
+  transition:none !important;
 }
-
-/* Ícono circular superior con SVG */
 .role-modal-icon{
-  width:60px;height:60px;
-  margin:0 auto 1.1rem;
-  border-radius:50%;
-  background:var(--bg-soft);
-  border:1px solid var(--border);
-  display:grid;place-items:center;
-  color:var(--accent);
+  width:60px;height:60px;margin:0 auto 1.1rem;
+  border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);
+  display:grid;place-items:center;color:var(--accent);
 }
-.role-modal-icon svg{
-  width:26px;height:26px;
-  stroke:currentColor;fill:none;
-  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;
-}
-
-/* Título dorado */
-.role-modal h2{
-  font-family:var(--font-serif);
-  font-size:1.25rem;
-  font-weight:400;
-  color:var(--accent);
-  margin-bottom:.5rem;
-  line-height:1.3;
-}
-
-/* Subtítulo */
-.role-modal .sub{
-  color:var(--text-dim);
-  font-size:.84rem;
-  margin-bottom:1.2rem;
-  line-height:1.5;
-}
-
+.role-modal-icon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.role-modal h2{font-family:var(--font-serif);font-size:1.25rem;font-weight:400;color:var(--accent);margin-bottom:.5rem;line-height:1.3}
+.role-modal .sub{color:var(--text-dim);font-size:.84rem;margin-bottom:1.2rem;line-height:1.5}
 .role-modal .field{margin-bottom:.8rem;text-align:left}
-.role-modal .field label{
-  display:none; /* El diseño de la imagen no muestra label */
-}
 
-/* Input con eye */
 .password-wrapper{position:relative;display:flex;align-items:center}
-.password-wrapper .input{
-  padding:.85rem 3rem .85rem 1rem;
-  font-size:1rem;
-  text-align:left;
-  letter-spacing:.5px;
-}
+.password-wrapper .input{padding:.85rem 3rem .85rem 1rem;font-size:1rem;text-align:left;letter-spacing:.5px}
 .password-toggle{
   position:absolute;right:.6rem;top:50%;transform:translateY(-50%);
   width:34px;height:34px;border-radius:50%;border:none;
@@ -268,38 +233,13 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .password-toggle:hover{color:var(--accent);background:var(--accent-glow)}
 .password-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-/* Botones lado a lado como en la imagen */
-.role-modal .actions{
-  display:flex;
-  gap:.6rem;
-  margin-top:1.2rem;
-  justify-content:center;
-}
-.role-modal .actions .btn-primary{
-  flex:1;
-  padding:.7rem 1rem;
-  font-size:.92rem;
-}
-.role-modal .actions .btn-ghost{
-  flex:1;
-  padding:.7rem 1rem;
-  font-size:.92rem;
-  border-radius:var(--radius-sm);
-}
+.role-modal .actions{display:flex;gap:.6rem;margin-top:1.2rem;justify-content:center}
+.role-modal .actions .btn-primary{flex:1;padding:.7rem 1rem;font-size:.92rem}
+.role-modal .actions .btn-ghost{flex:1;padding:.7rem 1rem;font-size:.92rem;border-radius:var(--radius-sm)}
 
-/* Mensaje de error */
-.role-error{
-  color:var(--danger);
-  font-size:.82rem;
-  text-align:center;
-  margin-top:.6rem;
-  min-height:1.2em;
-  font-weight:500;
-}
+.role-error{color:var(--danger);font-size:.82rem;text-align:center;margin-top:.6rem;min-height:1.2em;font-weight:500}
 
-/* ============================================
-   OTROS MODALES (lector, composer, confirm)
-   ============================================ */
+/* Otros modales */
 .modal{
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
   max-width:760px;width:100%;box-shadow:var(--shadow);
@@ -362,7 +302,7 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .empty-icon{font-size:2.6rem;margin-bottom:1rem;opacity:.5;display:inline-block}
 .empty p{font-family:var(--font-serif);font-size:1.05rem}
 
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--surface-2);border:1px solid var(--accent);color:var(--text);padding:.8rem 1.5rem;border-radius:40px;font-size:.9rem;z-index:400;transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow);max-width:90vw;text-align:center}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120%);background:var(--surface-2);border:1px solid var(--accent);color:var(--text);padding:.8rem 1.5rem;border-radius:40px;font-size:.9rem;z-index:5000;transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow);max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
 .confirm-box{max-width:400px;padding:1.8rem;text-align:center}
@@ -478,7 +418,7 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
   </div>
 </div>
 
-<!-- Modal de Rol (diseño idéntico a la imagen) -->
+<!-- Modal de Rol (z-index 3000, encima de la landing) -->
 <div class="overlay" id="roleOverlay">
   <div class="modal role-modal" id="roleModalBox">
     <div class="role-modal-icon" id="roleModalIcon"></div>
@@ -572,7 +512,7 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
 
 </div>
 
-<!-- Modales auxiliares -->
+<!-- Otros modales -->
 <div class="overlay" id="readerOverlay" onclick="if(event.target===this)closeReader()">
   <div class="modal">
     <button class="modal-close" onclick="closeReader()">✕</button>
@@ -644,28 +584,15 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
 
 <script>
 /* ============================================
-   PROTECCIÓN DE CONTRASEÑAS
-   Ofuscación con XOR para que no sea visible en texto plano.
-   Nota: en código de cliente la seguridad absoluta es imposible,
-   pero esto evita que cualquiera vea la contraseña de un vistazo.
+   PROTECCIÓN DE CONTRASEÑAS (ofuscación XOR)
    ============================================ */
 const _k1 = [0x4A, 0x64, 0x68, 0x74, 0x35, 0x31, 0x37, 0x37];
 const _s1 = 0x07;
 function _d1(){
   return _k1.map(function(b){ return String.fromCharCode(b ^ _s1); }).join('');
 }
-function _h(s){
-  // Hash simple adicional para comparación
-  let h = 0;
-  for(let i = 0; i < s.length; i++){
-    h = ((h << 5) - h) + s.charCodeAt(i);
-    h |= 0;
-  }
-  return h;
-}
 function _v(input){
-  const expected = _d1();
-  return input === expected;
+  return input === _d1();
 }
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
@@ -903,19 +830,17 @@ function openRoleModal(mode){
       <p style="font-size:.72rem;color:var(--text-faint);text-align:center;margin-top:.4rem">Si el perfil no existe, se creará automáticamente.</p>`;
   }
 
-  // Mostrar el modal — sin animación de entrada
-  const overlay=document.getElementById('roleOverlay');
-  overlay.classList.add('show');
+  // AÑADIR .show INMEDIATAMENTE
+  document.getElementById('roleOverlay').classList.add('show');
 
-  // Foco inmediato en el primer campo
+  // Foco inmediato
   const firstInput=fields.querySelector('input');
   if(firstInput){
-    requestAnimationFrame(()=>{
-      firstInput.focus();
-      setTimeout(()=>{
-        try{firstInput.scrollIntoView({behavior:'smooth', block:'center'});}catch(e){}
-      },150);
-    });
+    firstInput.focus();
+    // Asegurar visibilidad en móvil con teclado abierto
+    setTimeout(()=>{
+      try{firstInput.scrollIntoView({behavior:'smooth', block:'center'});}catch(e){}
+    },100);
   }
 }
 function closeRoleModal(){
@@ -929,14 +854,13 @@ function submitRole(){
   if(roleModalMode==='admin'){
     const pass=document.getElementById('rolePass').value;
     if(_v(pass)){
-      // CORRECTO — cerrar instantáneamente y entrar
+      // CORRECTO — cerrar modal instantáneamente y entrar
+      closeRoleModal();
       currentRole='admin';currentWriter='Administrador';
       localStorage.setItem('ecos_role','admin');
       localStorage.setItem('ecos_writer','Administrador');
-      closeRoleModal();
       enterApp();
     }else{
-      // INCORRECTO — mostrar mensaje
       err.textContent='Contraseña incorrecta';
     }
   }else if(roleModalMode==='writer'){
@@ -948,19 +872,19 @@ function submitRole(){
     const existing=writers.find(w=>w.name.toLowerCase()===name.toLowerCase());
     if(existing){
       if(existing.pass===pass){
+        closeRoleModal();
         currentRole='writer';currentWriter=name;
         localStorage.setItem('ecos_role','writer');
         localStorage.setItem('ecos_writer',name);
-        closeRoleModal();
         enterApp();
       }else{err.textContent='Contraseña incorrecta'}
     }else{
       writers.push({name,pass});
       localStorage.setItem('ecos_writers',JSON.stringify(writers));
+      closeRoleModal();
       currentRole='writer';currentWriter=name;
       localStorage.setItem('ecos_role','writer');
       localStorage.setItem('ecos_writer',name);
-      closeRoleModal();
       enterApp();
     }
   }
