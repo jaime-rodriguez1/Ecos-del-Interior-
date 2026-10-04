@@ -1,30 +1,18 @@
 // api/verificar-admin.js
-// =============================================
-// Verifica la contraseña del administrador de
-// forma segura. La contraseña vive SOLO en
-// las variables de entorno de Vercel.
-// =============================================
+import crypto from 'crypto';
 
-// Almacén de intentos por IP (en memoria, se resetea al redesplegar)
 const intentosFallidos = new Map();
 const MAX_INTENTOS = 5;
-const VENTANA_MS = 5 * 60 * 1000; // 5 minutos
+const VENTANA_MS = 5 * 60 * 1000;
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     return response.status(405).json({ valid: false, error: 'Método no permitido' });
   }
 
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // IP del cliente
   const ip = (request.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
-             request.headers['x-real-ip'] ||
-             'desconocida';
+             request.headers['x-real-ip'] || 'desconocida';
 
-  // Rate limiting
   const ahora = Date.now();
   const registro = intentosFallidos.get(ip) || { count: 0, firstAttempt: ahora };
 
@@ -42,7 +30,6 @@ export default async function handler(request, response) {
     });
   }
 
-  // Contraseña recibida
   const { password } = request.body || {};
   if (!password || typeof password !== 'string') {
     return response.status(400).json({ valid: false, error: 'Contraseña no válida' });
@@ -50,16 +37,16 @@ export default async function handler(request, response) {
 
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
-    return response.status(500).json({ valid: false, error: 'Configuración incompleta del servidor' });
+    return response.status(500).json({ valid: false, error: 'Configuración incompleta' });
   }
 
-  // Delay para dificultar fuerza bruta
   await new Promise(r => setTimeout(r, 400));
 
-  // Comparación en tiempo constante
   if (compararSeguro(password, adminPassword)) {
     intentosFallidos.delete(ip);
-    return response.status(200).json({ valid: true });
+    const expira = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 días
+    const token = generarToken(expira, adminPassword);
+    return response.status(200).json({ valid: true, token, expira });
   } else {
     registro.count += 1;
     intentosFallidos.set(ip, registro);
@@ -72,16 +59,18 @@ export default async function handler(request, response) {
   }
 }
 
-// Comparación de strings en tiempo constante (evita timing attacks)
 function compararSeguro(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
-  if (a.length !== b.length) {
-    // Aun así comparamos para no revelar la longitud real
-    b = a;
-  }
+  if (a.length !== b.length) { b = a; }
   let resultado = 0;
   for (let i = 0; i < a.length; i++) {
     resultado |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return resultado === 0 && a.length === b.length;
+}
+
+function generarToken(expira, secret) {
+  const payload = `admin:${expira}`;
+  const firma = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return Buffer.from(`${payload}:${firma}`).toString('base64');
 }
