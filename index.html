@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Ecos del Interior — Una Exploración Filosófica</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root, [data-theme="dark"]{
   --bg:#0a0a0c;--bg-soft:#121216;--surface:#17171c;--surface-2:#1e1e25;
   --border:#2a2a33;--text:#e8e6e1;--text-dim:#9a968e;--text-faint:#6b6760;
   --accent:#c9a227;--accent-soft:#e0b84a;--accent-glow:rgba(201,162,39,.15);
   --danger:#c25b5b;--like:#e0526a;--radius:14px;--radius-sm:8px;
-  --shadow:0 10px 40px rgba(0,0,0,.5);--overlay-bg:rgba(5,5,7,.75);
+  --shadow:0 10px 40px rgba(0,0,0,.5);--overlay-bg:rgba(5,5,7,.88);
   --header-bg:rgba(10,10,12,.85);
   --font-serif:'Georgia','Iowan Old Style','Palatino Linotype',serif;
   --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -20,7 +21,7 @@
   --border:#ddd8ce;--text:#1a1815;--text-dim:#5c574f;--text-faint:#8a8479;
   --accent:#a37e0f;--accent-soft:#c9a227;--accent-glow:rgba(163,126,15,.12);
   --danger:#b03a3a;--like:#d13a55;--shadow:0 10px 40px rgba(0,0,0,.12);
-  --overlay-bg:rgba(30,28,25,.7);--header-bg:rgba(245,243,238,.9);
+  --overlay-bg:rgba(30,28,25,.75);--header-bg:rgba(245,243,238,.9);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{width:100%;height:100%;background:var(--bg);scroll-behavior:smooth}
@@ -40,71 +41,32 @@ body.landing-active{overflow:hidden}
 .particle{position:absolute;background:var(--accent);border-radius:50%;opacity:.35;filter:blur(.5px);animation:floatParticle linear infinite}
 @keyframes floatParticle{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.5}50%{transform:translate(50px,-100px) scale(1.3);opacity:.7}90%{opacity:.3}100%{transform:translate(-30px,-250px) scale(.8);opacity:0}}
 
-/* ============================================
-   LANDING (z-index: 1000)
-   ============================================ */
-.landing{
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  width:100vw;height:100vh;height:100dvh;
-  min-height:100vh;min-height:100dvh;
-  z-index:1000;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  padding:1.2rem;overflow:hidden;
-  transition:opacity .4s, visibility .4s;margin:0;
-}
+.landing{position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;height:100dvh;min-height:100vh;min-height:100dvh;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow:hidden;transition:opacity .4s,visibility .4s;margin:0}
 .landing.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.landing::before{
-  content:'';position:absolute;inset:0;
-  background-image:radial-gradient(circle at 20% 30%,rgba(201,162,39,.12),transparent 45%),radial-gradient(circle at 80% 70%,rgba(120,80,180,.08),transparent 45%);
-  pointer-events:none;z-index:1;
-}
-.landing-content{
-  width:100%;max-width:min(1000px, calc(100vw - 2.4rem));max-height:100%;
-  text-align:center;position:relative;z-index:2;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;
-}
-.landing-logo{
-  width:72px;height:72px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,var(--accent-soft),var(--accent) 55%,#6b5410);
-  display:grid;place-items:center;font-family:var(--font-serif);font-size:1.8rem;color:#0a0a0c;
-  margin:0 auto .9rem;box-shadow:0 0 40px rgba(201,162,39,.35);
-  position:relative;flex-shrink:0;
-}
+.landing::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 30%,rgba(201,162,39,.12),transparent 45%),radial-gradient(circle at 80% 70%,rgba(120,80,180,.08),transparent 45%);pointer-events:none;z-index:1}
+.landing-content{width:100%;max-width:min(1000px, calc(100vw - 2.4rem));max-height:100%;text-align:center;position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}
+.landing-logo{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--accent-soft),var(--accent) 55%,#6b5410);display:grid;place-items:center;font-family:var(--font-serif);font-size:1.8rem;color:#0a0a0c;margin:0 auto .9rem;box-shadow:0 0 40px rgba(201,162,39,.35);position:relative;flex-shrink:0}
 .landing-logo::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px dashed rgba(201,162,39,.5);animation:spinRing 18s linear infinite}
 .landing-logo::after{content:'';position:absolute;inset:-14px;border-radius:50%;border:1px solid rgba(201,162,39,.2);animation:spinRing 30s linear infinite reverse}
 @keyframes spinRing{to{transform:rotate(360deg)}}
-
 .landing h1{font-family:var(--font-serif);font-size:clamp(1.6rem,5vw,3.2rem);font-weight:400;letter-spacing:-1px;line-height:1.15;margin-bottom:.5rem;word-break:break-word}
 .landing h1 em{font-style:italic;color:var(--accent)}
 .landing-sub{color:var(--text-dim);font-family:var(--font-serif);font-size:.95rem;margin-bottom:.4rem;font-style:italic}
 .landing-prompt{font-size:.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
 
 .role-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:.8rem;margin-top:.5rem;width:100%}
-.role-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:1.4rem 1rem;cursor:none;
-  transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;
-  position:relative;overflow:hidden;text-align:center;min-width:0;
-}
+.role-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem 1rem;cursor:none;transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;position:relative;overflow:hidden;text-align:center;min-width:0}
 .role-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(201,162,39,.08),transparent);opacity:0;transition:opacity .4s;pointer-events:none}
 .role-card:hover{transform:translateY(-5px);border-color:rgba(201,162,39,.5);box-shadow:0 20px 50px rgba(0,0,0,.4),0 0 30px rgba(201,162,39,.15)}
 .role-card:hover::before{opacity:1}
-.role-icon-wrap{
-  width:52px;height:52px;margin:0 auto .8rem;display:grid;place-items:center;
-  border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);color:var(--accent);
-  transition:all .35s cubic-bezier(.2,.8,.2,1);
-}
+.role-icon-wrap{width:52px;height:52px;margin:0 auto .8rem;display:grid;place-items:center;border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);color:var(--accent);transition:all .35s cubic-bezier(.2,.8,.2,1)}
 .role-card:hover .role-icon-wrap{transform:scale(1.06);border-color:var(--accent);box-shadow:0 0 22px var(--accent-glow);background:var(--accent-glow)}
 .role-icon-wrap svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .role-card h3{font-family:var(--font-serif);font-size:1.15rem;font-weight:400;margin-bottom:.4rem;color:var(--text)}
 .role-card p{font-size:.78rem;color:var(--text-dim);line-height:1.5}
 
-/* ============================================
-   APP
-   ============================================ */
 .app{opacity:0;transition:opacity .4s .1s}
 .app.visible{opacity:1}
-
 header{position:sticky;top:0;z-index:100;background:var(--header-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
 .header-inner{max-width:1500px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:.7rem;cursor:pointer;user-select:none;transition:transform .3s}
@@ -121,7 +83,7 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .icon-btn:hover{color:var(--accent);border-color:var(--accent);transform:rotate(180deg) scale(1.1)}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#9d7d14);color:#0a0a0c;border:none;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:600;font-size:.88rem;cursor:none;transition:all .3s;font-family:var(--font-sans);white-space:nowrap}
 .btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 30px rgba(201,162,39,.45)}
-
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .role-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface);border:1px solid var(--border);padding:.4rem .8rem;border-radius:30px;font-size:.78rem;color:var(--text-dim)}
 .role-badge.admin{color:var(--accent);border-color:var(--accent)}
 .role-badge.writer{color:#7a9ec9;border-color:rgba(122,158,201,.5)}
@@ -146,7 +108,6 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .post-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:none;display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .4s;position:relative;transform-style:preserve-3d;opacity:0;transform:translateY(40px)}
 .post-card.revealed{opacity:1;transform:translateY(0);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .4s}
 .post-card:hover{border-color:rgba(201,162,39,.5);box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(201,162,39,.15)}
-[data-theme="light"] .post-card:hover{box-shadow:0 25px 60px rgba(0,0,0,.15),0 0 40px rgba(163,126,15,.12)}
 .post-cover{height:150px;background-size:cover;background-position:center;position:relative;filter:saturate(.8) brightness(.75);transition:filter .4s}
 .post-card:hover .post-cover{filter:saturate(1) brightness(.88)}
 .post-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface),transparent 65%);z-index:1}
@@ -184,70 +145,28 @@ nav{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 .aforismo-generating .spinner{width:14px;height:14px;border:2px solid var(--accent-glow);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ============================================
-   OVERLAY (z-index 3000 — ENCIMA DE TODO)
-   ============================================ */
-.overlay{
-  position:fixed;inset:0;
-  background:var(--overlay-bg);
-  z-index:3000; /* CRUCIAL: por encima de la landing (1000) */
-  display:none;
-  align-items:center;justify-content:center;
-  padding:1.5rem 1rem;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  transition:none !important;
-}
-.overlay.show{display:flex !important}
+.overlay{position:fixed;inset:0;background:var(--overlay-bg);z-index:3000;display:none;align-items:center;justify-content:center;padding:1.5rem 1rem;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);max-width:760px;width:100%;box-shadow:var(--shadow);position:relative;margin:auto;max-height:calc(100vh - 3rem);overflow-y:auto}
+.modal-close{position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--text-dim);cursor:none;font-size:1rem;display:grid;place-items:center;transition:all .3s;z-index:5}
+.modal-close:hover{color:var(--text);background:var(--surface-2);transform:rotate(90deg) scale(1.1)}
 
-/* Modal de rol — diseño idéntico a la imagen */
-.role-modal{
-  max-width:360px;width:100%;
-  padding:1.8rem 1.6rem 1.5rem;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(201,162,39,.08);
-  text-align:center;position:relative;margin:auto;
-  transition:none !important;
-}
-.role-modal-icon{
-  width:60px;height:60px;margin:0 auto 1.1rem;
-  border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);
-  display:grid;place-items:center;color:var(--accent);
-}
+.role-modal{max-width:400px;padding:1.8rem 1.5rem}
+.role-modal-icon{width:60px;height:60px;margin:0 auto 1.1rem;border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);display:grid;place-items:center;color:var(--accent)}
 .role-modal-icon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.role-modal h2{font-family:var(--font-serif);font-size:1.25rem;font-weight:400;color:var(--accent);margin-bottom:.5rem;line-height:1.3}
-.role-modal .sub{color:var(--text-dim);font-size:.84rem;margin-bottom:1.2rem;line-height:1.5}
-.role-modal .field{margin-bottom:.8rem;text-align:left}
-
-.password-wrapper{position:relative;display:flex;align-items:center}
-.password-wrapper .input{padding:.85rem 3rem .85rem 1rem;font-size:1rem;text-align:left;letter-spacing:.5px}
-.password-toggle{
-  position:absolute;right:.6rem;top:50%;transform:translateY(-50%);
-  width:34px;height:34px;border-radius:50%;border:none;
-  background:transparent;color:var(--text-faint);cursor:none;
-  display:grid;place-items:center;transition:all .25s;
-  -webkit-tap-highlight-color:transparent;
-}
-.password-toggle:hover{color:var(--accent);background:var(--accent-glow)}
-.password-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-
+.role-modal h2{font-family:var(--font-serif);font-size:1.25rem;font-weight:400;color:var(--accent);margin-bottom:.5rem;text-align:center;line-height:1.3}
+.role-modal .sub{color:var(--text-dim);font-size:.84rem;text-align:center;margin-bottom:1.2rem;line-height:1.5}
+.role-modal .field{margin-bottom:.8rem}
 .role-modal .actions{display:flex;gap:.6rem;margin-top:1.2rem;justify-content:center}
 .role-modal .actions .btn-primary{flex:1;padding:.7rem 1rem;font-size:.92rem}
 .role-modal .actions .btn-ghost{flex:1;padding:.7rem 1rem;font-size:.92rem;border-radius:var(--radius-sm)}
+.role-error{color:var(--danger);font-size:.82rem;text-align:center;margin-top:.6rem;min-height:1.2em;font-weight:500;line-height:1.4}
 
-.role-error{color:var(--danger);font-size:.82rem;text-align:center;margin-top:.6rem;min-height:1.2em;font-weight:500}
-
-/* Otros modales */
-.modal{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  max-width:760px;width:100%;box-shadow:var(--shadow);
-  position:relative;margin:auto;
-  max-height:calc(100vh - 3rem);overflow-y:auto;
-}
-.modal-close{position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--text-dim);cursor:none;font-size:1rem;display:grid;place-items:center;transition:all .3s;z-index:5}
-.modal-close:hover{color:var(--text);background:var(--surface-2);transform:rotate(90deg) scale(1.1)}
+.password-wrapper{position:relative;display:flex;align-items:center}
+.password-wrapper .input{padding:.85rem 3rem .85rem 1rem;font-size:1rem;letter-spacing:.3px}
+.password-toggle{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--text-faint);cursor:none;display:grid;place-items:center;transition:all .25s;-webkit-tap-highlight-color:transparent}
+.password-toggle:hover{color:var(--accent);background:var(--accent-glow)}
+.password-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 .reader-cover{height:210px;background-size:cover;background-position:center;border-radius:var(--radius) var(--radius) 0 0;position:relative;filter:saturate(.8) brightness(.7)}
 .reader-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface),transparent 70%);border-radius:var(--radius) var(--radius) 0 0}
@@ -329,7 +248,6 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
   .role-icon-wrap svg{width:20px;height:20px}
   .role-card h3{font-size:1.05rem}
   .role-card p{font-size:.72rem}
-
   .header-inner{padding:.85rem 1rem}
   .logo-text{font-size:1rem}
   .logo-mark{width:34px;height:34px;font-size:1rem}
@@ -342,18 +260,8 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
   body{cursor:auto}
   .cursor-dot,.cursor-ring{display:none}
   button,.chip,.post-card,.action-btn,.cover-opt,.role-card,.view-btn,.password-toggle{cursor:pointer}
-
-  .overlay{
-    align-items:center;
-    padding:1.2rem .9rem;
-    padding-top:max(1.2rem, env(safe-area-inset-top));
-    padding-bottom:max(1.2rem, env(safe-area-inset-bottom));
-  }
-  .role-modal{
-    max-width:100%;
-    padding:1.6rem 1.3rem 1.3rem;
-    border-radius:16px;
-  }
+  .overlay{align-items:center;padding:1.2rem .9rem;padding-top:max(1.2rem,env(safe-area-inset-top));padding-bottom:max(1.2rem,env(safe-area-inset-bottom))}
+  .role-modal{max-width:100%;padding:1.6rem 1.3rem 1.3rem}
   .role-modal h2{font-size:1.15rem}
   .role-modal .sub{font-size:.8rem;margin-bottom:1rem}
   .role-modal-icon{width:54px;height:54px;margin-bottom:.9rem}
@@ -380,36 +288,24 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
     <h1>Ecos <em>del</em> Interior</h1>
     <p class="landing-sub">Un santuario digital para el pensamiento profundo</p>
     <p class="landing-prompt">Elige tu forma de entrar</p>
-
     <div class="role-cards">
       <div class="role-card" onclick="openRoleModal('admin')">
         <div class="role-icon-wrap">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2.5 4 6v6.5c0 5 3.5 9.2 8 9.8 4.5-.6 8-4.8 8-9.8V6l-8-3.5z"/>
-            <circle cx="12" cy="11.5" r="1.6"/>
-            <path d="M12 13.1V16"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2.5 4 6v6.5c0 5 3.5 9.2 8 9.8 4.5-.6 8-4.8 8-9.8V6l-8-3.5z"/><circle cx="12" cy="11.5" r="1.6"/><path d="M12 13.1V16"/></svg>
         </div>
         <h3>Administrador</h3>
         <p>Acceso total. Solo el dueño de la página.</p>
       </div>
       <div class="role-card" onclick="openRoleModal('writer')">
         <div class="role-icon-wrap">
-          <svg viewBox="0 0 24 24">
-            <path d="M20.5 3.5c-7 .5-11.5 4.5-13 11l-2 5"/>
-            <path d="M20.5 3.5c-.5 7-4.5 11.5-11 13"/>
-            <path d="M5 20.5 3.5 22"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M20.5 3.5c-7 .5-11.5 4.5-13 11l-2 5"/><path d="M20.5 3.5c-.5 7-4.5 11.5-11 13"/><path d="M5 20.5 3.5 22"/></svg>
         </div>
         <h3>Escritor</h3>
         <p>Crea y gestiona tus propios ecos.</p>
       </div>
       <div class="role-card" onclick="enterAsVisitor()">
         <div class="role-icon-wrap">
-          <svg viewBox="0 0 24 24">
-            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
         <h3>Visitante</h3>
         <p>Lee, comenta y comparte libremente.</p>
@@ -418,9 +314,9 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
   </div>
 </div>
 
-<!-- Modal de Rol (z-index 3000, encima de la landing) -->
+<!-- Modal de Rol -->
 <div class="overlay" id="roleOverlay">
-  <div class="modal role-modal" id="roleModalBox">
+  <div class="modal role-modal">
     <div class="role-modal-icon" id="roleModalIcon"></div>
     <h2 id="roleModalTitle">Acceso</h2>
     <p class="sub" id="roleModalSub"></p>
@@ -435,7 +331,6 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
 
 <!-- APP -->
 <div class="app" id="app">
-
 <header>
   <div class="header-inner">
     <div class="logo" onclick="scrollTo({top:0,behavior:'smooth'})">
@@ -470,9 +365,7 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
       <button class="chip" data-filter="voluntad" onclick="setFilter('voluntad', this)">Voluntad</button>
       <button class="chip" data-filter="conciencia" onclick="setFilter('conciencia', this)">Conciencia</button>
     </div>
-
     <main class="posts-grid" id="postsGrid"></main>
-
     <section class="mindmap-container" id="mindmapContainer" style="display:none">
       <div style="text-align:center;margin-bottom:1.5rem">
         <h2 style="font-family:var(--font-serif);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:400;margin-bottom:.5rem">Mapa <em style="color:var(--accent);font-style:italic">Mental</em> de los Ecos</h2>
@@ -494,7 +387,6 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
       <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-faint);font-style:italic">Arrastra para mover · Pellizca para acercar · Toca un nodo para abrir el eco</p>
     </section>
   </div>
-
   <aside class="aforismos-panel" id="aforismosPanel">
     <div class="aforismos-header">
       <span class="aforismos-icon">✦</span>
@@ -504,15 +396,13 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
     <div id="aforismosList"></div>
   </aside>
 </div>
-
 <footer>
   <div class="logo-text">Ecos <span style="color:var(--accent)">del</span> Interior</div>
   <p>Un santuario digital para el pensamiento profundo · <span id="year"></span></p>
 </footer>
-
 </div>
 
-<!-- Otros modales -->
+<!-- Modales -->
 <div class="overlay" id="readerOverlay" onclick="if(event.target===this)closeReader()">
   <div class="modal">
     <button class="modal-close" onclick="closeReader()">✕</button>
@@ -547,7 +437,7 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
     <button class="modal-close" onclick="closeComposer()">✕</button>
     <div class="composer-body">
       <h2 id="composerTitle">Publicar un nuevo eco</h2>
-      <p class="composer-sub" id="composerSub">Al publicar, la IA DeepSeek generará un aforismo a partir de tu texto.</p>
+      <p class="composer-sub" id="composerSub">Al publicar, la IA generará un aforismo a partir de tu texto.</p>
       <div class="field"><label>Tu nombre</label><input class="input" id="newAuthor" placeholder="Anónimo" maxlength="30"></div>
       <div class="field"><label>Título</label><input class="input" id="newTitle" placeholder="Un título que resuene..." maxlength="120"></div>
       <div class="field"><label>Categoría</label>
@@ -584,16 +474,12 @@ footer .logo-text{font-size:1rem;margin-bottom:.5rem}
 
 <script>
 /* ============================================
-   PROTECCIÓN DE CONTRASEÑAS (ofuscación XOR)
+   SUPABASE — Inicialización
    ============================================ */
-const _k1 = [0x4A, 0x64, 0x68, 0x74, 0x35, 0x31, 0x37, 0x37];
-const _s1 = 0x07;
-function _d1(){
-  return _k1.map(function(b){ return String.fromCharCode(b ^ _s1); }).join('');
-}
-function _v(input){
-  return input === _d1();
-}
+const SUPABASE_URL = 'TU_SUPABASE_URL';        // ← Reemplazar
+const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY'; // ← Reemplazar
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 let DEEPSEEK_API_KEY = localStorage.getItem('ecos_deepseek_key') || '';
@@ -697,18 +583,24 @@ Ambas formas de voluntad coexisten en el ser humano, manteniendo entre sí una r
 Dichos mecanismos, de carácter determinista (relación causa-efecto), operan en sinergia y se hallan conectados en un estado de armonía homeostática.`,comments:[],views:0,likes:0,likedByMe:false}
 ];
 
+/* ============================================
+   ESTADO GLOBAL
+   ============================================ */
 let posts=[];
 let aforismos=[];
 let currentFilter='todos';
 let currentPostId=null;
 let selectedCover=COVERS[0];
 let editingPostId=null;
-let currentUser=localStorage.getItem('ecos_username')||'';
 let currentView='posts';
 let mapTool='all';
-let currentRole=localStorage.getItem('ecos_role')||null;
-let currentWriter=localStorage.getItem('ecos_writer')||null;
 let roleModalMode=null;
+
+// Estado de autenticación con Supabase
+let currentUser=null;      // Usuario de Supabase Auth
+let currentProfile=null;   // Perfil de la tabla profiles
+let currentRole='visitor'; // 'admin' | 'writer' | 'visitor'
+let currentWriter=null;    // display_name del perfil
 
 /* CURSOR */
 const cursorDot=document.getElementById('cursorDot');
@@ -758,7 +650,7 @@ function toggleTheme(){
 }
 
 /* PARTÍCULAS */
-function createParticlesIn(containerId, count){
+function createParticlesIn(containerId,count){
   const c=document.getElementById(containerId);
   if(!c)return;
   c.innerHTML='';
@@ -766,8 +658,7 @@ function createParticlesIn(containerId, count){
     const p=document.createElement('div');
     p.className='particle';
     const size=Math.random()*4+1.5;
-    p.style.width=size+'px';
-    p.style.height=size+'px';
+    p.style.width=size+'px';p.style.height=size+'px';
     p.style.left=Math.random()*100+'%';
     p.style.top=(Math.random()*100+20)+'%';
     p.style.animationDuration=(Math.random()*15+12)+'s';
@@ -776,13 +667,13 @@ function createParticlesIn(containerId, count){
   }
 }
 
-/* ICONOS SVG */
-const ICON_SHIELD = `<svg viewBox="0 0 24 24"><path d="M12 2.5 4 6v6.5c0 5 3.5 9.2 8 9.8 4.5-.6 8-4.8 8-9.8V6l-8-3.5z"/><circle cx="12" cy="11.5" r="1.6"/><path d="M12 13.1V16"/></svg>`;
-const ICON_FEATHER = `<svg viewBox="0 0 24 24"><path d="M20.5 3.5c-7 .5-11.5 4.5-13 11l-2 5"/><path d="M20.5 3.5c-.5 7-4.5 11.5-11 13"/><path d="M5 20.5 3.5 22"/></svg>`;
-const EYE_SVG = `<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const EYE_OFF_SVG = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+/* ICONOS */
+const ICON_SHIELD=`<svg viewBox="0 0 24 24"><path d="M12 2.5 4 6v6.5c0 5 3.5 9.2 8 9.8 4.5-.6 8-4.8 8-9.8V6l-8-3.5z"/><circle cx="12" cy="11.5" r="1.6"/><path d="M12 13.1V16"/></svg>`;
+const ICON_FEATHER=`<svg viewBox="0 0 24 24"><path d="M20.5 3.5c-7 .5-11.5 4.5-13 11l-2 5"/><path d="M20.5 3.5c-.5 7-4.5 11.5-11 13"/><path d="M5 20.5 3.5 22"/></svg>`;
+const EYE_SVG=`<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_OFF_SVG=`<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
 
-function togglePasswordVisibility(inputId, btn){
+function togglePasswordVisibility(inputId,btn){
   const input=document.getElementById(inputId);
   if(!input)return;
   const isPassword=input.type==='password';
@@ -790,7 +681,9 @@ function togglePasswordVisibility(inputId, btn){
   btn.innerHTML=isPassword?EYE_OFF_SVG:EYE_SVG;
 }
 
-/* ROLES / LANDING */
+/* ============================================
+   MODALES DE ROL
+   ============================================ */
 function openRoleModal(mode){
   roleModalMode=mode;
   const title=document.getElementById('roleModalTitle');
@@ -798,7 +691,10 @@ function openRoleModal(mode){
   const fields=document.getElementById('roleModalFields');
   const icon=document.getElementById('roleModalIcon');
   const err=document.getElementById('roleError');
+  const btn=document.getElementById('roleModalBtn');
   err.textContent='';
+  btn.disabled=false;
+  btn.textContent='Entrar';
 
   if(mode==='admin'){
     icon.innerHTML=ICON_SHIELD;
@@ -813,34 +709,28 @@ function openRoleModal(mode){
       </div>`;
   }else if(mode==='writer'){
     icon.innerHTML=ICON_FEATHER;
-    const writers=getWriters();
-    const existing=writers.length>0;
     title.textContent='Acceso para Escritor';
-    sub.textContent=existing?'Introduce tu nombre y contraseña.':'Crea tu perfil de escritor.';
+    sub.textContent='Entra con tu correo. Si no tienes cuenta, se creará automáticamente.';
     fields.innerHTML=`
       <div class="field">
-        <input class="input" id="writerName" placeholder="Nombre de escritor" maxlength="30" autocomplete="off">
+        <input class="input" type="email" id="writerEmail" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
       </div>
       <div class="field">
         <div class="password-wrapper">
-          <input class="input" type="password" id="writerPass" placeholder="Contraseña" autocomplete="off">
+          <input class="input" type="password" id="writerPass" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="new-password">
           <button type="button" class="password-toggle" onclick="togglePasswordVisibility('writerPass', this)" title="Mostrar u ocultar">${EYE_SVG}</button>
         </div>
       </div>
-      <p style="font-size:.72rem;color:var(--text-faint);text-align:center;margin-top:.4rem">Si el perfil no existe, se creará automáticamente.</p>`;
+      <p style="font-size:.72rem;color:var(--text-faint);text-align:center;margin-top:.4rem">Revisa tu correo después de registrarte.</p>`;
   }
 
-  // AÑADIR .show INMEDIATAMENTE
   document.getElementById('roleOverlay').classList.add('show');
-
-  // Foco inmediato
   const firstInput=fields.querySelector('input');
   if(firstInput){
-    firstInput.focus();
-    // Asegurar visibilidad en móvil con teclado abierto
-    setTimeout(()=>{
-      try{firstInput.scrollIntoView({behavior:'smooth', block:'center'});}catch(e){}
-    },100);
+    requestAnimationFrame(()=>{
+      firstInput.focus();
+      setTimeout(()=>{try{firstInput.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}},150);
+    });
   }
 }
 function closeRoleModal(){
@@ -849,55 +739,110 @@ function closeRoleModal(){
   const err=document.getElementById('roleError');
   if(err)err.textContent='';
 }
-function submitRole(){
+
+async function submitRole(){
   const err=document.getElementById('roleError');
+  const btn=document.getElementById('roleModalBtn');
+  err.textContent='';
+
+  /* ---- ADMIN ---- */
   if(roleModalMode==='admin'){
     const pass=document.getElementById('rolePass').value;
-    if(_v(pass)){
-      // CORRECTO — cerrar modal instantáneamente y entrar
-      closeRoleModal();
-      currentRole='admin';currentWriter='Administrador';
-      localStorage.setItem('ecos_role','admin');
-      localStorage.setItem('ecos_writer','Administrador');
-      enterApp();
-    }else{
-      err.textContent='Contraseña incorrecta';
-    }
-  }else if(roleModalMode==='writer'){
-    const name=document.getElementById('writerName').value.trim();
-    const pass=document.getElementById('writerPass').value;
-    if(!name||name.length<2){err.textContent='Introduce un nombre válido';return}
-    if(!pass||pass.length<4){err.textContent='La contraseña debe tener al menos 4 caracteres';return}
-    const writers=getWriters();
-    const existing=writers.find(w=>w.name.toLowerCase()===name.toLowerCase());
-    if(existing){
-      if(existing.pass===pass){
+    if(!pass){err.textContent='Escribe la contraseña';return}
+    btn.disabled=true;btn.textContent='Verificando...';
+    try{
+      const response=await fetch('/api/verificar-admin',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({password:pass})
+      });
+      const data=await response.json();
+      if(data.valid){
+        // Verificar si ya tiene sesión activa
+        const {data:{session}}=await supabase.auth.getSession();
+        if(!session){
+          err.textContent='Primero regístrate como escritor, luego pide ser admin.';
+          btn.disabled=false;btn.textContent='Entrar';
+          return;
+        }
+        // Verificar que su perfil sea admin
+        const {data:profile}=await supabase.from('profiles').select('*').eq('id',session.user.id).single();
+        if(!profile||profile.role!=='admin'){
+          // Promoverlo a admin si aún no lo es (el admin password lo autoriza)
+          if(profile){
+            await supabase.from('profiles').update({role:'admin'}).eq('id',session.user.id);
+            profile.role='admin';
+          }
+        }
+        currentUser=session.user;
+        currentProfile=profile;
+        currentRole='admin';
+        currentWriter=profile?.display_name||'Administrador';
         closeRoleModal();
-        currentRole='writer';currentWriter=name;
-        localStorage.setItem('ecos_role','writer');
-        localStorage.setItem('ecos_writer',name);
         enterApp();
-      }else{err.textContent='Contraseña incorrecta'}
-    }else{
-      writers.push({name,pass});
-      localStorage.setItem('ecos_writers',JSON.stringify(writers));
-      closeRoleModal();
-      currentRole='writer';currentWriter=name;
-      localStorage.setItem('ecos_role','writer');
-      localStorage.setItem('ecos_writer',name);
-      enterApp();
+      }else{
+        err.textContent=data.error||'Contraseña incorrecta';
+        if(data.intentosRestantes!==undefined){
+          err.textContent+=` · Intentos restantes: ${data.intentosRestantes}`;
+        }
+      }
+    }catch(e){
+      console.error(e);
+      err.textContent='Error de conexión';
+    }finally{
+      btn.disabled=false;btn.textContent='Entrar';
     }
+    return;
+  }
+
+  /* ---- ESCRITOR ---- */
+  if(roleModalMode==='writer'){
+    const email=document.getElementById('writerEmail').value.trim();
+    const pass=document.getElementById('writerPass').value;
+    if(!email||!email.includes('@')){err.textContent='Correo no válido';return}
+    if(!pass||pass.length<6){err.textContent='La contraseña debe tener mínimo 6 caracteres';return}
+
+    btn.disabled=true;btn.textContent='Procesando...';
+
+    // Intentar login
+    const {data,error}=await supabase.auth.signInWithPassword({email,password:pass});
+
+    if(error){
+      // Si falla el login, intentar registro
+      const {data:signUpData,error:signUpError}=await supabase.auth.signUp({
+        email,
+        password:pass,
+        options:{data:{display_name:email.split('@')[0]}}
+      });
+      btn.disabled=false;btn.textContent='Entrar';
+      if(signUpError){
+        err.textContent=signUpError.message;
+        return;
+      }
+      err.textContent='✓ Cuenta creada. Revisa tu correo para confirmar antes de entrar.';
+      return;
+    }
+
+    // Login exitoso
+    currentUser=data.user;
+    const {data:profile}=await supabase.from('profiles').select('*').eq('id',data.user.id).single();
+    currentProfile=profile;
+    currentRole=profile?.role||'writer';
+    currentWriter=profile?.display_name||email.split('@')[0];
+    btn.disabled=false;btn.textContent='Entrar';
+    closeRoleModal();
+    enterApp();
   }
 }
-function getWriters(){
-  try{return JSON.parse(localStorage.getItem('ecos_writers')||'[]')}catch(e){return[]}
-}
+
 function enterAsVisitor(){
-  currentRole='visitor';currentWriter=null;
-  localStorage.setItem('ecos_role','visitor');
-  localStorage.removeItem('ecos_writer');
+  currentUser=null;
+  currentProfile=null;
+  currentRole='visitor';
+  currentWriter=null;
   enterApp();
 }
+
 function enterApp(){
   document.body.classList.remove('landing-active');
   document.getElementById('landing').classList.add('hidden');
@@ -907,33 +852,52 @@ function enterApp(){
   renderPosts();
   renderAforismos();
 }
-function logout(){
-  if(!confirm('¿Cerrar sesión y volver a la portada?'))return;
-  localStorage.removeItem('ecos_role');
-  localStorage.removeItem('ecos_writer');
-  currentRole=null;currentWriter=null;
+
+async function logout(){
+  if(!confirm('¿Cerrar sesión?'))return;
+  await supabase.auth.signOut();
+  currentUser=null;currentProfile=null;currentRole='visitor';currentWriter=null;
   location.reload();
 }
+
 function updateRoleBadge(){
   const badge=document.getElementById('roleBadge');
   badge.className='role-badge';
-  if(currentRole==='admin'){badge.textContent='👑 Administrador';badge.classList.add('admin')}
-  else if(currentRole==='writer'){badge.textContent='✍️ '+currentWriter;badge.classList.add('writer')}
-  else{badge.textContent='👁 Visitante';badge.classList.add('visitor')}
+  if(currentRole==='admin'){
+    badge.textContent='👑 Administrador';
+    badge.classList.add('admin');
+  }else if(currentRole==='writer'){
+    badge.textContent='✍️ '+(currentWriter||'Escritor');
+    badge.classList.add('writer');
+  }else{
+    badge.textContent='👁 Visitante';
+    badge.classList.add('visitor');
+  }
 }
+
 function updatePermissions(){
   const writeBtn=document.getElementById('btnWrite');
-  if(currentRole==='visitor')writeBtn.style.display='none';
-  else writeBtn.style.display='';
+  if(currentRole==='visitor'||!currentUser){
+    writeBtn.style.display='none';
+  }else{
+    writeBtn.style.display='';
+  }
 }
+
 function canEdit(post){
+  if(!currentUser)return false;
   if(currentRole==='admin')return true;
-  if(currentRole==='writer'&&post.author.toLowerCase()===currentWriter.toLowerCase())return true;
+  if(currentRole==='writer'&&post.author===currentWriter)return true;
   return false;
 }
-function canPublish(){return currentRole==='admin'||currentRole==='writer'}
 
-/* AFORISMOS */
+function canPublish(){
+  return (currentRole==='admin'||currentRole==='writer')&&!!currentUser;
+}
+
+/* ============================================
+   AFORISMOS
+   ============================================ */
 function loadAforismos(){
   const stored=localStorage.getItem('ecos_aforismos_v1');
   if(stored){try{aforismos=JSON.parse(stored);return}catch(e){}}
@@ -941,6 +905,7 @@ function loadAforismos(){
   saveAforismos();
 }
 function saveAforismos(){localStorage.setItem('ecos_aforismos_v1',JSON.stringify(aforismos))}
+
 function renderAforismos(){
   const list=document.getElementById('aforismosList');
   const count=document.getElementById('aforismosCount');
@@ -966,46 +931,35 @@ function renderAforismos(){
   });
 }
 
-/* DEEPSEEK */
-async function generateAforismoWithDeepSeek(post){
-  if(!DEEPSEEK_API_KEY)return generateLocalAforismo(post);
+async function generarAforismo(post){
   try{
-    const response=await fetch(DEEPSEEK_API_URL,{
+    const response=await fetch('/api/generar-aforismo',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_API_KEY},
-      body:JSON.stringify({
-        model:'deepseek-chat',
-        messages:[
-          {role:'system',content:'Eres un filósofo que extrae la esencia de un texto en una sola frase aforística, poética y profunda, en español. Máximo 140 caracteres. Sin comillas, sin prefijos, solo la frase.'},
-          {role:'user',content:`Título: ${post.title}\n\nContenido: ${post.content}\n\nGenera un único aforismo que capture la esencia del texto.`}
-        ],
-        max_tokens:80,
-        temperature:0.9
-      })
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({titulo:post.title,contenido:post.content})
     });
-    if(!response.ok)throw new Error('DeepSeek status '+response.status);
+    if(!response.ok)throw new Error('Backend error');
     const data=await response.json();
-    let text=data.choices?.[0]?.message?.content?.trim()||'';
-    text=text.replace(/^["'«»]|["'«»]$/g,'').trim();
-    if(!text)return generateLocalAforismo(post);
-    return text;
+    return data.aforismo||generarAforismoLocal(post);
   }catch(e){
-    console.warn('DeepSeek falló, usando generación local:',e);
-    return generateLocalAforismo(post);
+    console.warn('Backend falló, usando local:',e);
+    return generarAforismoLocal(post);
   }
 }
-function generateLocalAforismo(post){
+
+function generarAforismoLocal(post){
   const sentences=post.content.split(/[.!?\n]+/).map(s=>s.trim()).filter(s=>s.length>=40&&s.length<=150);
   if(sentences.length>0){const pick=sentences[0];return pick.charAt(0).toUpperCase()+pick.slice(1)+'.'}
   return post.title+'.';
 }
+
 async function addAforismoForPost(post){
   const list=document.getElementById('aforismosList');
   const placeholder=document.createElement('div');
   placeholder.className='aforismo-generating';
   placeholder.innerHTML=`<div class="spinner"></div><span>Generando aforismo con IA…</span>`;
   list.insertBefore(placeholder,list.firstChild);
-  const text=await generateAforismoWithDeepSeek(post);
+  const text=await generarAforismo(post);
   placeholder.remove();
   const af={id:'af-'+Date.now(),text,sourcePostId:post.id,sourceTitle:post.title,date:new Date().toISOString().slice(0,10),isNew:true};
   aforismos.push(af);
@@ -1014,7 +968,9 @@ async function addAforismoForPost(post){
   showToast('✦ Nuevo aforismo generado');
 }
 
-/* POSTS */
+/* ============================================
+   POSTS (localStorage por ahora)
+   ============================================ */
 function loadPosts(){
   const stored=localStorage.getItem('ecos_posts_v2');
   if(stored){
@@ -1083,9 +1039,7 @@ function renderPosts(){
         <div class="post-meta">
           <div class="post-author"><div class="avatar">${initial}</div><span>${escapeHtml(post.author)}</span></div>
           <div class="post-stats">
-            <span class="stat-badge ${post.likedByMe?'liked':''}">
-              <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span>${post.likes||0}
-            </span>
+            <span class="stat-badge ${post.likedByMe?'liked':''}"><span class="heart-icon">${post.likedByMe?'❤':'♡'}</span>${post.likes||0}</span>
             <span>👁 ${post.views||0}</span>
             <span>💬 ${post.comments?post.comments.length:0}</span>
           </div>
@@ -1112,9 +1066,7 @@ function openReader(id){
   document.getElementById('readerContent').textContent=post.content;
   document.getElementById('readerStats').innerHTML=`
     <span class="stat-badge">👁 ${post.views} visualizaciones</span>
-    <span class="stat-badge ${post.likedByMe?'liked':''}">
-      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes||0} me gusta
-    </span>
+    <span class="stat-badge ${post.likedByMe?'liked':''}"><span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes||0} me gusta</span>
     <span class="stat-badge">💬 ${post.comments?post.comments.length:0} comentarios</span>`;
   renderReaderActions(post);
   renderComments(post);
@@ -1136,564 +1088,4 @@ function renderReaderActions(post){
 }
 function sharePost(id){
   const post=posts.find(p=>p.id===id);
-  if(!post)return;
-  const text=`"${post.title}" — Ecos del Interior\n\n${post.content.slice(0,200)}…`;
-  if(navigator.share){navigator.share({title:post.title,text}).catch(()=>{})}
-  else{navigator.clipboard.writeText(text).then(()=>showToast('Copiado al portapapeles ✓'))}
-}
-function closeReader(){
-  document.getElementById('readerOverlay').classList.remove('show');
-  document.body.style.overflow='';
-  currentPostId=null;
-}
-function toggleLike(){
-  if(!currentPostId)return;
-  const post=posts.find(p=>p.id===currentPostId);
-  if(!post)return;
-  if(post.likedByMe){post.likes=Math.max(0,(post.likes||0)-1);post.likedByMe=false}
-  else{post.likes=(post.likes||0)+1;post.likedByMe=true}
-  savePosts();
-  document.getElementById('readerStats').innerHTML=`
-    <span class="stat-badge">👁 ${post.views} visualizaciones</span>
-    <span class="stat-badge ${post.likedByMe?'liked':''}">
-      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes} me gusta
-    </span>
-    <span class="stat-badge">💬 ${post.comments?post.comments.length:0} comentarios</span>`;
-  renderReaderActions(post);
-  renderPosts();
-}
-function renderComments(post){
-  const list=document.getElementById('commentsList');
-  const countEl=document.getElementById('commentCount');
-  const comments=post.comments||[];
-  countEl.textContent=comments.length;
-  list.innerHTML='';
-  if(comments.length===0){
-    list.innerHTML=`<p style="color:var(--text-faint);font-size:.88rem;font-style:italic;margin-bottom:1rem">Sé el primero en dejar tu eco.</p>`;
-    return;
-  }
-  comments.forEach((c,idx)=>{
-    const div=document.createElement('div');
-    div.className='comment';
-    div.innerHTML=`
-      <div class="comment-head">
-        <div class="avatar">${(c.author||'A')[0].toUpperCase()}</div>
-        <span class="comment-author">${escapeHtml(c.author)}</span>
-        <span class="comment-date">${formatDate(c.date)}</span>
-        <button class="comment-delete" onclick="event.stopPropagation();deleteComment(${idx})">✕</button>
-      </div>
-      <div class="comment-text">${escapeHtml(c.text)}</div>`;
-    list.appendChild(div);
-  });
-}
-function addComment(){
-  if(!currentPostId)return;
-  const nameInput=document.getElementById('commentName');
-  const textInput=document.getElementById('commentText');
-  const name=nameInput.value.trim()||currentWriter||'Anónimo';
-  const text=textInput.value.trim();
-  if(!text){showToast('Escribe algo antes de publicar.');return}
-  if(name!=='Anónimo'&&currentRole!=='admin'&&currentRole!=='writer'){
-    currentUser=name;localStorage.setItem('ecos_username',name);
-  }
-  const post=posts.find(p=>p.id===currentPostId);
-  if(!post.comments)post.comments=[];
-  post.comments.push({author:name,text:text,date:new Date().toISOString().slice(0,10)});
-  savePosts();
-  renderComments(post);
-  renderPosts();
-  document.getElementById('readerStats').innerHTML=`
-    <span class="stat-badge">👁 ${post.views} visualizaciones</span>
-    <span class="stat-badge ${post.likedByMe?'liked':''}">
-      <span class="heart-icon">${post.likedByMe?'❤':'♡'}</span> ${post.likes||0} me gusta
-    </span>
-    <span class="stat-badge">💬 ${post.comments.length} comentarios</span>`;
-  textInput.value='';
-  showToast('Comentario publicado ✓');
-}
-function deleteComment(idx){
-  if(!currentPostId)return;
-  const post=posts.find(p=>p.id===currentPostId);
-  if(!post||!post.comments)return;
-  post.comments.splice(idx,1);
-  savePosts();
-  renderComments(post);
-  renderPosts();
-  showToast('Comentario eliminado');
-}
-
-function openComposer(){
-  if(!canPublish()){showToast('Los visitantes no pueden publicar. Crea un perfil de escritor.');return}
-  editingPostId=null;
-  document.getElementById('composerTitle').textContent='Publicar un nuevo eco';
-  document.getElementById('composerSub').textContent='Al publicar, la IA DeepSeek generará un aforismo a partir de tu texto.';
-  document.getElementById('publishBtn').textContent='Publicar';
-  document.getElementById('newAuthor').value=(currentRole==='writer'?currentWriter:currentUser)||'';
-  document.getElementById('newTitle').value='';
-  document.getElementById('newContent').value='';
-  document.getElementById('newTag').value='filosofía';
-  renderCoverPresets(COVERS[0]);
-  selectedCover=COVERS[0];
-  document.getElementById('composerOverlay').classList.add('show');
-  document.body.style.overflow='hidden';
-}
-function openEdit(id){
-  const post=posts.find(p=>p.id===id);
-  if(!post||!canEdit(post))return;
-  editingPostId=id;
-  document.getElementById('composerTitle').textContent='Editar eco';
-  document.getElementById('composerSub').textContent='Modifica lo que necesites. No se generará un nuevo aforismo automáticamente.';
-  document.getElementById('publishBtn').textContent='Guardar cambios';
-  document.getElementById('newAuthor').value=post.author;
-  document.getElementById('newTitle').value=post.title;
-  document.getElementById('newContent').value=post.content;
-  document.getElementById('newTag').value=post.tag;
-  selectedCover=post.cover;
-  renderCoverPresets(post.cover);
-  closeReader();
-  document.getElementById('composerOverlay').classList.add('show');
-  document.body.style.overflow='hidden';
-}
-function renderCoverPresets(selected){
-  const presets=document.getElementById('coverPresets');
-  presets.innerHTML='';
-  COVERS.forEach(url=>{
-    const div=document.createElement('div');
-    div.className='cover-opt'+(url===selected?' selected':'');
-    div.style.backgroundImage=`url('${url}')`;
-    div.onclick=()=>{
-      document.querySelectorAll('.cover-opt').forEach(el=>el.classList.remove('selected'));
-      div.classList.add('selected');
-      selectedCover=url;
-    };
-    presets.appendChild(div);
-  });
-}
-function closeComposer(){
-  document.getElementById('composerOverlay').classList.remove('show');
-  document.body.style.overflow='';
-  editingPostId=null;
-}
-async function publishPost(){
-  if(!canPublish()){showToast('No tienes permiso para publicar.');return}
-  const author=document.getElementById('newAuthor').value.trim()||(currentRole==='writer'?currentWriter:'Anónimo');
-  const title=document.getElementById('newTitle').value.trim();
-  const tag=document.getElementById('newTag').value;
-  const content=document.getElementById('newContent').value.trim();
-  if(!title||!content){showToast('El título y el texto son obligatorios.');return}
-  if(editingPostId){
-    const post=posts.find(p=>p.id===editingPostId);
-    if(post&&canEdit(post)){
-      post.author=author;post.title=title;post.tag=tag;post.content=content;post.cover=selectedCover;
-      savePosts();
-      showToast('Eco actualizado ✓');
-    }
-    renderPosts();
-    closeComposer();
-    if(currentView==='map')buildMap();
-    return;
-  }else{
-    const newPost={id:'post-'+Date.now(),author,tag,title,content,cover:selectedCover,date:new Date().toISOString().slice(0,10),comments:[],views:0,likes:0,likedByMe:false};
-    posts.unshift(newPost);
-    savePosts();
-    aforismos.forEach(a=>a.isNew=false);
-    saveAforismos();
-    showToast('Tu eco ha sido publicado ✓');
-    closeComposer();
-    renderPosts();
-    await addAforismoForPost(newPost);
-    if(currentView==='map')buildMap();
-  }
-}
-
-let postToDelete=null;
-function confirmDelete(id){
-  const post=posts.find(p=>p.id===id);
-  if(!post||!canEdit(post)){showToast('No puedes eliminar este eco.');return}
-  postToDelete=id;
-  document.getElementById('confirmTitle').textContent='¿Eliminar este eco?';
-  document.getElementById('confirmText').textContent='Esta acción no se puede deshacer. Se perderán también sus comentarios y reacciones.';
-  document.getElementById('confirmYes').onclick=doDelete;
-  document.getElementById('confirmOverlay').classList.add('show');
-}
-function doDelete(){
-  if(!postToDelete)return;
-  posts=posts.filter(p=>p.id!==postToDelete);
-  savePosts();
-  closeConfirm();
-  closeReader();
-  renderPosts();
-  showToast('Eco eliminado');
-  postToDelete=null;
-  if(currentView==='map')buildMap();
-}
-function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('show');postToDelete=null}
-
-function setFilter(filter){
-  currentFilter=filter;
-  document.querySelectorAll('.chip').forEach(el=>{
-    if(el.dataset.filter===filter)el.classList.add('active');
-    else el.classList.remove('active');
-  });
-  renderPosts();
-}
-function setView(view){
-  currentView=view;
-  document.getElementById('viewPosts').classList.toggle('active',view==='posts');
-  document.getElementById('viewMap').classList.toggle('active',view==='map');
-  document.getElementById('filtersBar').style.display=view==='posts'?'flex':'none';
-  document.getElementById('postsGrid').style.display=view==='posts'?'grid':'none';
-  document.getElementById('mindmapContainer').style.display=view==='map'?'block':'none';
-  if(view==='map'){setTimeout(()=>{resizeCanvas();buildMap();},50)}
-}
-function setMapTool(tool,btn){
-  mapTool=tool;
-  document.querySelectorAll('.map-tool[data-tool]').forEach(el=>el.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  buildMap();
-}
-
-/* MAPA MENTAL */
-const CONCEPTS={
-  'Aislamiento':['aislamiento','silencio','soledad','solo','solitario','marginad','excluid','encerrad'],
-  'Dolor':['dolor','sufrimiento','sufrir','herida','lastima','padecer'],
-  'Memoria':['memoria','recuerdo','olvido','recordar','olvidar'],
-  'Deseo':['deseo','anhelo','ansia','aspira','querer','apetito'],
-  'Miedo':['miedo','temor','terror','amenaza','peligro','angustia'],
-  'Voluntad':['voluntad','volición','impulso','decisión'],
-  'Conciencia':['conciencia','consciente','darse cuenta','percibir','despertar','lucidez'],
-  'Transformación':['cambio','transforma','metamorfosis','renovación','evoluc'],
-  'Necesidad':['necesidad','carencia','falta','vacío','escasez','privación'],
-  'Identidad':['identidad','autoimagen','personalidad','sí mismo','ego'],
-  'Relación':['relación','vínculo','reciprocidad','amor','convivencia'],
-  'Verdad':['verdad','autenticidad','realidad','verdadero'],
-  'Creencia':['creencia','prejuicio','ideología','filtro','dogma'],
-  'Resiliencia':['resiliencia','adversidad','superación','resistencia'],
-  'Insatisfacción':['insatisfacción','descontento','desasosiego'],
-  'Emoción':['emoción','sentimiento','afecto','pasión'],
-  'Cognición':['cognición','pensamiento','razón','conceptualiz','análisis']
-};
-const mapCanvas=document.getElementById('mindmapCanvas');
-const mapCtx=mapCanvas.getContext('2d');
-let mapNodes=[],mapEdges=[],mapAnimId=null;
-let mapCamera={x:0,y:0,zoom:1};
-let mapDragging=false,mapLastMouse={x:0,y:0};
-let mapHoveredNode=null,mapClickedNode=null;
-let mapWidth=1200,mapHeight=600;
-const CATEGORY_COLORS={'filosofía':'#e0b84a','psique':'#c98bb8','existencia':'#7ac9a9','voluntad':'#c98b6b','conciencia':'#8bb8c9'};
-
-function resizeCanvas(){
-  if(!mapCanvas)return;
-  const rect=mapCanvas.getBoundingClientRect();
-  const dpr=window.devicePixelRatio||1;
-  mapCanvas.width=rect.width*dpr;
-  mapCanvas.height=rect.height*dpr;
-  mapCtx.setTransform(dpr,0,0,dpr,0,0);
-  mapWidth=rect.width;mapHeight=rect.height;
-}
-function buildMap(){
-  if(currentView!=='map')return;
-  resizeCanvas();
-  mapNodes=[];mapEdges=[];
-  const centerNode={id:'center',label:'Ecos del Interior',type:'center',x:mapWidth/2,y:mapHeight/2,vx:0,vy:0,r:44};
-  mapNodes.push(centerNode);
-  const categories=['filosofía','psique','existencia','voluntad','conciencia'];
-  const catMap={};
-  categories.forEach((cat,i)=>{
-    const angle=(i/categories.length)*Math.PI*2-Math.PI/2;
-    const radius=Math.min(mapWidth,mapHeight)*0.28;
-    const node={id:'cat-'+cat,label:cat,type:'category',cat,x:centerNode.x+Math.cos(angle)*radius,y:centerNode.y+Math.sin(angle)*radius,vx:0,vy:0,r:30};
-    mapNodes.push(node);catMap[cat]=node;
-    mapEdges.push({source:centerNode,target:node,kind:'cat'});
-  });
-  const postNodes={};
-  const postsFiltered=mapTool==='all'?posts:posts.filter(p=>p.tag===mapTool);
-  postsFiltered.forEach(p=>{
-    const cat=catMap[p.tag]||centerNode;
-    const angle=Math.random()*Math.PI*2;
-    const dist=130+Math.random()*90;
-    const node={id:'post-'+p.id,label:p.title,shortLabel:p.title.split(':')[0],type:'post',postId:p.id,cat:p.tag,x:cat.x+Math.cos(angle)*dist,y:cat.y+Math.sin(angle)*dist,vx:0,vy:0,r:16};
-    mapNodes.push(node);postNodes[p.id]=node;
-    mapEdges.push({source:cat,target:node,kind:'post'});
-  });
-  const conceptMatches={};
-  Object.keys(CONCEPTS).forEach(c=>conceptMatches[c]=[]);
-  postsFiltered.forEach(p=>{
-    const text=(p.title+' '+p.content).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    Object.keys(CONCEPTS).forEach(concept=>{
-      const matched=CONCEPTS[concept].some(kw=>text.includes(kw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')));
-      if(matched)conceptMatches[concept].push(p.id);
-    });
-  });
-  const conceptNodes={};
-  Object.keys(conceptMatches).forEach(concept=>{
-    const ids=conceptMatches[concept];
-    if(ids.length<2)return;
-    const angle=Math.random()*Math.PI*2;
-    const dist=Math.min(mapWidth,mapHeight)*0.42;
-    const node={id:'concept-'+concept,label:concept,type:'concept',x:centerNode.x+Math.cos(angle)*dist,y:centerNode.y+Math.sin(angle)*dist,vx:0,vy:0,r:20};
-    mapNodes.push(node);conceptNodes[concept]=node;
-    ids.forEach(pid=>{if(postNodes[pid])mapEdges.push({source:postNodes[pid],target:node,kind:'concept'})});
-  });
-  document.getElementById('statPosts').textContent=postsFiltered.length;
-  document.getElementById('statConcepts').textContent=Object.keys(conceptNodes).length;
-  document.getElementById('statLinks').textContent=mapEdges.length;
-  mapNodes.forEach(n=>{if(n.type!=='center'){n.vx=(Math.random()-0.5)*3;n.vy=(Math.random()-0.5)*3}});
-  mapCamera={x:0,y:0,zoom:1};
-  for(let i=0;i<180;i++)simulateMapStep();
-  if(mapAnimId)cancelAnimationFrame(mapAnimId);
-  runMapLoop();
-}
-function simulateMapStep(){
-  const repulsion=14000,springK=0.008,damping=0.85,gravity=0.0009,maxVel=12;
-  mapNodes.forEach(n=>{n.fx=0;n.fy=0});
-  for(let i=0;i<mapNodes.length;i++){
-    for(let j=i+1;j<mapNodes.length;j++){
-      const a=mapNodes[i],b=mapNodes[j];
-      let dx=b.x-a.x,dy=b.y-a.y;
-      let d2=dx*dx+dy*dy;if(d2<1)d2=1;
-      const d=Math.sqrt(d2);
-      const f=repulsion/d2;
-      const fx=(dx/d)*f,fy=(dy/d)*f;
-      a.fx-=fx;a.fy-=fy;b.fx+=fx;b.fy+=fy;
-    }
-  }
-  mapEdges.forEach(e=>{
-    const a=e.source,b=e.target;
-    const dx=b.x-a.x,dy=b.y-a.y;
-    const d=Math.sqrt(dx*dx+dy*dy)||1;
-    let desired=150;
-    if(e.kind==='cat')desired=170;
-    if(e.kind==='concept')desired=180;
-    const force=(d-desired)*springK;
-    const fx=(dx/d)*force,fy=(dy/d)*force;
-    a.fx+=fx;a.fy+=fy;b.fx-=fx;b.fy-=fy;
-  });
-  mapNodes.forEach(n=>{
-    if(n.type==='center')return;
-    n.fx+=(mapWidth/2-n.x)*gravity;
-    n.fy+=(mapHeight/2-n.y)*gravity;
-  });
-  mapNodes.forEach(n=>{
-    if(n.type==='center')return;
-    n.vx=(n.vx+n.fx)*damping;
-    n.vy=(n.vy+n.fy)*damping;
-    const sp=Math.sqrt(n.vx*n.vx+n.vy*n.vy);
-    if(sp>maxVel){n.vx=(n.vx/sp)*maxVel;n.vy=(n.vy/sp)*maxVel}
-    n.x+=n.vx;n.y+=n.vy;
-  });
-}
-function runMapLoop(){
-  let frame=0;
-  function loop(){
-    frame++;
-    if(frame<200)simulateMapStep();
-    drawMap();
-    mapAnimId=requestAnimationFrame(loop);
-  }
-  loop();
-}
-function drawMap(){
-  if(!mapCtx)return;
-  const isDark=document.documentElement.getAttribute('data-theme')!=='light';
-  mapCtx.clearRect(0,0,mapWidth,mapHeight);
-  mapCtx.save();
-  mapCtx.translate(mapWidth/2+mapCamera.x,mapHeight/2+mapCamera.y);
-  mapCtx.scale(mapCamera.zoom,mapCamera.zoom);
-  mapCtx.translate(-mapWidth/2,-mapHeight/2);
-  mapEdges.forEach(e=>{
-    const a=e.source,b=e.target;
-    const isHl=mapHoveredNode&&(mapHoveredNode===a||mapHoveredNode===b);
-    let alpha=.18,width=1,stroke=isDark?'rgba(201,162,39,.6)':'rgba(163,126,15,.6)';
-    if(e.kind==='cat'){alpha=.35;width=1.5}
-    if(e.kind==='concept'){alpha=.15;stroke=isDark?'rgba(169,122,201,.5)':'rgba(150,100,180,.5)'}
-    if(isHl){alpha=.9;width=2.5}
-    mapCtx.beginPath();
-    mapCtx.strokeStyle=stroke;mapCtx.globalAlpha=alpha;mapCtx.lineWidth=width;
-    mapCtx.moveTo(a.x,a.y);mapCtx.lineTo(b.x,b.y);mapCtx.stroke();
-  });
-  mapCtx.globalAlpha=1;
-  mapNodes.forEach(n=>{
-    const isHovered=mapHoveredNode===n;
-    let fill,stroke,textColor;
-    if(n.type==='center'){fill=isDark?'#c9a227':'#a37e0f';stroke=isDark?'#e0b84a':'#c9a227';textColor='#0a0a0c'}
-    else if(n.type==='category'){fill=CATEGORY_COLORS[n.cat]||'#e0b84a';stroke='rgba(255,255,255,.3)';textColor='#0a0a0c'}
-    else if(n.type==='post'){fill=isDark?'#7a9ec9':'#4a7ab0';stroke='rgba(122,158,201,.7)';textColor=isDark?'#e8e6e1':'#1a1815'}
-    else{fill=isDark?'#a97ac9':'#8555a8';stroke='rgba(169,122,201,.7)';textColor=isDark?'#e8e6e1':'#1a1815'}
-    mapCtx.beginPath();mapCtx.arc(n.x,n.y,n.r,0,Math.PI*2);
-    mapCtx.fillStyle=fill;mapCtx.globalAlpha=isHovered?1:0.92;mapCtx.fill();
-    mapCtx.globalAlpha=1;mapCtx.lineWidth=isHovered?2.5:1.5;mapCtx.strokeStyle=stroke;mapCtx.stroke();
-    let fs;
-    if(n.type==='center')fs=15;else if(n.type==='category')fs=12;else if(n.type==='concept')fs=11;else fs=10;
-    mapCtx.font=`${n.type==='center'?'bold ':''}${fs}px sans-serif`;
-    mapCtx.textAlign='center';mapCtx.textBaseline='middle';
-    if(n.type==='center'||n.type==='category'){
-      mapCtx.fillStyle=textColor;mapCtx.fillText(n.label,n.x,n.y);
-    }else{
-      mapCtx.fillStyle=isDark?'#e8e6e1':'#1a1815';
-      mapCtx.globalAlpha=isHovered?1:0.75;
-      const lbl=n.type==='post'?(n.shortLabel||n.label).slice(0,26):n.label;
-      mapCtx.fillText(lbl,n.x,n.y+n.r+14);
-      mapCtx.globalAlpha=1;
-    }
-  });
-  mapCtx.restore();
-}
-function getMapMouse(e){
-  const rect=mapCanvas.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
-  const wx=(x-mapWidth/2-mapCamera.x)/mapCamera.zoom+mapWidth/2;
-  const wy=(y-mapHeight/2-mapCamera.y)/mapCamera.zoom+mapHeight/2;
-  return{x,y,wx,wy};
-}
-function hitTestNode(sx,sy){
-  const wx=(sx-mapWidth/2-mapCamera.x)/mapCamera.zoom+mapWidth/2;
-  const wy=(sy-mapHeight/2-mapCamera.y)/mapCamera.zoom+mapHeight/2;
-  for(let i=mapNodes.length-1;i>=0;i--){
-    const n=mapNodes[i];
-    const dx=wx-n.x,dy=wy-n.y;
-    const hitRadius=n.r+8;
-    if(dx*dx+dy*dy<=hitRadius*hitRadius)return n;
-  }
-  return null;
-}
-function resetMapView(){mapCamera={x:0,y:0,zoom:1};buildMap();showToast('Vista recentrada')}
-
-mapCanvas.addEventListener('mousedown',e=>{
-  const{x,y}=getMapMouse(e);
-  const hit=hitTestNode(x,y);
-  if(hit)mapClickedNode=hit;
-  else{mapDragging=true;mapLastMouse={x:e.clientX,y:e.clientY}}
-});
-mapCanvas.addEventListener('mousemove',e=>{
-  const{x,y}=getMapMouse(e);
-  if(mapDragging){
-    mapCamera.x+=e.clientX-mapLastMouse.x;
-    mapCamera.y+=e.clientY-mapLastMouse.y;
-    mapLastMouse={x:e.clientX,y:e.clientY};
-    return;
-  }
-  mapHoveredNode=hitTestNode(x,y);
-  mapCanvas.style.cursor=mapHoveredNode?'pointer':'grab';
-});
-mapCanvas.addEventListener('mouseup',e=>{
-  const{x,y}=getMapMouse(e);
-  const hit=hitTestNode(x,y);
-  if(hit&&mapClickedNode===hit&&hit.type==='post'&&hit.postId)openReader(hit.postId);
-  mapClickedNode=null;mapDragging=false;
-});
-mapCanvas.addEventListener('mouseleave',()=>{mapDragging=false;mapClickedNode=null});
-mapCanvas.addEventListener('wheel',e=>{
-  e.preventDefault();
-  mapCamera.zoom=Math.max(0.35,Math.min(2.5,mapCamera.zoom*(e.deltaY<0?1.12:0.9)));
-},{passive:false});
-
-let touchState={isPanning:false,isPinching:false,lastX:0,lastY:0,startDist:0,startZoom:1,tapStartTime:0,tapStartX:0,tapStartY:0,moved:false};
-mapCanvas.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  if(e.touches.length===1){
-    const t=e.touches[0];
-    touchState.isPanning=true;touchState.isPinching=false;
-    touchState.lastX=t.clientX;touchState.lastY=t.clientY;
-    touchState.tapStartTime=Date.now();
-    touchState.tapStartX=t.clientX;touchState.tapStartY=t.clientY;
-    touchState.moved=false;
-  }else if(e.touches.length===2){
-    touchState.isPanning=false;touchState.isPinching=true;
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    touchState.startDist=Math.sqrt(dx*dx+dy*dy);
-    touchState.startZoom=mapCamera.zoom;
-  }
-},{passive:false});
-mapCanvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(touchState.isPanning&&e.touches.length===1){
-    const t=e.touches[0];
-    const dx=t.clientX-touchState.lastX;
-    const dy=t.clientY-touchState.lastY;
-    if(Math.abs(dx)>2||Math.abs(dy)>2)touchState.moved=true;
-    mapCamera.x+=dx;mapCamera.y+=dy;
-    touchState.lastX=t.clientX;touchState.lastY=t.clientY;
-  }else if(touchState.isPinching&&e.touches.length===2){
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    const scale=dist/touchState.startDist;
-    mapCamera.zoom=Math.max(0.35,Math.min(2.5,touchState.startZoom*scale));
-  }
-},{passive:false});
-mapCanvas.addEventListener('touchend',e=>{
-  e.preventDefault();
-  if(touchState.isPanning&&!touchState.moved&&e.touches.length===0){
-    const dt=Date.now()-touchState.tapStartTime;
-    if(dt<350){
-      const rect=mapCanvas.getBoundingClientRect();
-      const x=touchState.tapStartX-rect.left;
-      const y=touchState.tapStartY-rect.top;
-      const hit=hitTestNode(x,y);
-      if(hit&&hit.type==='post'&&hit.postId)openReader(hit.postId);
-      else if(hit)showToast(hit.label);
-    }
-  }
-  if(e.touches.length===0){touchState.isPanning=false;touchState.isPinching=false}
-},{passive:false});
-mapCanvas.addEventListener('touchcancel',()=>{touchState.isPanning=false;touchState.isPinching=false});
-
-function escapeHtml(str){
-  if(!str)return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-}
-function formatDate(iso){
-  if(!iso)return '';
-  const d=new Date(iso+'T00:00:00');
-  const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return `${d.getDate()} ${m[d.getMonth()]}`;
-}
-function formatLongDate(iso){
-  if(!iso)return '';
-  const d=new Date(iso+'T00:00:00');
-  const m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${d.getDate()} de ${m[d.getMonth()]}, ${d.getFullYear()}`;
-}
-let toastTimer;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-/* INIT */
-initTheme();
-document.getElementById('year').textContent=new Date().getFullYear();
-loadPosts();
-loadAforismos();
-createParticlesIn('landingParticles',30);
-createParticlesIn('heroParticles',22);
-
-if(currentRole){
-  document.body.classList.remove('landing-active');
-  document.getElementById('landing').classList.add('hidden');
-  document.getElementById('app').classList.add('visible');
-  updateRoleBadge();
-  updatePermissions();
-}
-renderPosts();
-renderAforismos();
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeReader();closeComposer();closeConfirm();closeRoleModal()}
-});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&document.getElementById('roleOverlay').classList.contains('show')){
-    e.preventDefault();
-    submitRole();
-  }
-});
-window.addEventListener('resize',()=>{
-  if(currentView==='map')resizeCanvas();
-});
-</script>
-</body>
-</html>
+  if
