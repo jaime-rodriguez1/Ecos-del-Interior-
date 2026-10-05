@@ -360,5 +360,4 @@
     detectarInfluencias: detectarInfluencias,
     calcularResumen: calcularResumen
   };
-
 })();
