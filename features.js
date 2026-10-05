@@ -1,7 +1,5 @@
 /* ============================================
-   ECOS DEL INTERIOR — Features Extendidas v3
-   Usa setInterval en vez de MutationObserver
-   para evitar congelar el navegador.
+   ECOS DEL INTERIOR — Features Extendidas v4
    ============================================ */
 
 (function(){
@@ -137,70 +135,121 @@
   }
 
   // ============================================
-  // 5. COMPARTIR IMAGEN
+  // 5. COMPARTIR IMAGEN (título + contenido)
   // ============================================
-  function compartirImagen(texto, autor){
+  function envolverTexto(ctx, texto, maxWidth){
+    var palabras = String(texto).split(' ');
+    var lineas = [];
+    var linea = '';
+    for(var i=0;i<palabras.length;i++){
+      var test = linea + palabras[i] + ' ';
+      if(ctx.measureText(test).width > maxWidth && linea !== ''){
+        lineas.push(linea.trim());
+        linea = palabras[i] + ' ';
+      } else {
+        linea = test;
+      }
+    }
+    if(linea.trim()) lineas.push(linea.trim());
+    return lineas;
+  }
+
+  function compartirImagen(titulo, contenido, autor){
     try{
       var canvas = document.createElement('canvas');
-      canvas.width = 1080; canvas.height = 1080;
+      canvas.width = 1080;
+      canvas.height = 1350;
       var ctx = canvas.getContext('2d');
-      var grad = ctx.createLinearGradient(0,0,1080,1080);
+
+      // Fondo degradado
+      var grad = ctx.createLinearGradient(0,0,1080,1350);
       grad.addColorStop(0, '#0a0a0c');
       grad.addColorStop(1, '#1a1a20');
       ctx.fillStyle = grad;
-      ctx.fillRect(0,0,1080,1080);
+      ctx.fillRect(0,0,1080,1350);
 
-      for(var i=0;i<40;i++){
-        var x = Math.random()*1080, y = Math.random()*1080, r = Math.random()*2;
+      // Puntos decorativos
+      for(var i=0;i<50;i++){
+        var x = Math.random()*1080, y = Math.random()*1350, r = Math.random()*2;
         ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
         ctx.fillStyle = 'rgba(201,162,39,' + (Math.random()*.3) + ')';
         ctx.fill();
       }
 
+      // Borde dorado
       ctx.strokeStyle = 'rgba(201,162,39,.5)';
       ctx.lineWidth = 3;
-      ctx.strokeRect(40,40,1000,1000);
+      ctx.strokeRect(40,40,1000,1270);
 
+      // Marca superior
       ctx.fillStyle = '#c9a227';
       ctx.font = 'bold 26px Georgia, serif';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
       ctx.fillText('✦  ECOS DEL INTERIOR  ✦', 540, 130);
 
-      ctx.fillStyle = '#e8e6e1';
-      ctx.font = 'italic 48px Georgia, serif';
+      // TÍTULO
+      ctx.fillStyle = '#c9a227';
+      ctx.font = 'bold 42px Georgia, serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      var maxWidth = 900, lineHeight = 70;
-      var palabras = String(texto).split(' ');
-      var lineas = [], linea = '';
-      for(var k=0;k<palabras.length;k++){
-        var p = palabras[k];
-        var test = linea + p + ' ';
-        if(ctx.measureText(test).width > maxWidth && linea !== ''){
-          lineas.push(linea.trim()); linea = p + ' ';
-        } else { linea = test; }
+      var lineasTitulo = envolverTexto(ctx, titulo || 'Sin título', 900);
+      if(lineasTitulo.length > 3){
+        lineasTitulo = lineasTitulo.slice(0, 3);
+        lineasTitulo[2] = lineasTitulo[2].slice(0, -3) + '…';
       }
-      if(linea.trim()) lineas.push(linea.trim());
-
-      var yInicio = (1080 - lineas.length*lineHeight)/2 + 30;
-      for(var j=0;j<lineas.length;j++){
-        var l = lineas[j];
-        ctx.fillText('"' + l + (j === lineas.length-1 ? '"' : ''), 540, yInicio + j*lineHeight);
+      var alturaTitulo = lineasTitulo.length * 56;
+      var yTitulo = 230;
+      for(var t=0;t<lineasTitulo.length;t++){
+        ctx.fillText(lineasTitulo[t], 540, yTitulo + t*56);
       }
 
+      // Línea separadora
+      ctx.strokeStyle = 'rgba(201,162,39,.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(240, yTitulo + alturaTitulo + 10);
+      ctx.lineTo(840, yTitulo + alturaTitulo + 10);
+      ctx.stroke();
+
+      // CONTENIDO
+      ctx.fillStyle = '#e8e6e1';
+      ctx.font = 'italic 30px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      var contenidoRecortado = String(contenido || '');
+      if(contenidoRecortado.length > 620){
+        contenidoRecortado = contenidoRecortado.slice(0, 620).trim() + '…';
+      }
+
+      var lineasContenido = envolverTexto(ctx, contenidoRecortado, 900);
+      if(lineasContenido.length > 16){
+        lineasContenido = lineasContenido.slice(0, 16);
+        lineasContenido[15] = lineasContenido[15].slice(0, -3) + '…';
+      }
+
+      var yContenido = yTitulo + alturaTitulo + 80;
+      var lineHeightContenido = 44;
+      for(var c2=0;c2<lineasContenido.length;c2++){
+        ctx.fillText(lineasContenido[c2], 540, yContenido + c2*lineHeightContenido);
+      }
+
+      // Autor al pie
       if(autor){
         ctx.fillStyle = '#9a968e';
         ctx.font = 'italic 24px Georgia, serif';
-        ctx.fillText('— ' + autor, 540, 960);
+        ctx.fillText('— ' + autor, 540, 1230);
       }
 
+      // Descargar
       canvas.toBlob(function(blob){
         try{
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download = 'aforismo-ecos.png';
+          a.download = 'eco-ecos-del-interior.png';
           a.click();
           setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
           if(typeof showToast === 'function') showToast('Imagen descargada ✦');
@@ -318,14 +367,9 @@
         if(typeof posts !== 'undefined' && typeof currentPostId !== 'undefined'){
           post = posts.find(function(p){ return p.id === currentPostId; });
         }
-        var textoAforismo = null;
-        if(typeof aforismos !== 'undefined' && post){
-          var found = aforismos.find(function(a){ return a.sourcePostId === post.id; });
-          if(found) textoAforismo = found.text;
-        }
-        var texto = textoAforismo || (post ? post.title : '');
-        var autor = post ? post.author : '';
-        compartirImagen(texto, autor);
+        if(!post) return;
+        // Enviar TÍTULO, CONTENIDO y AUTOR
+        compartirImagen(post.title, post.content, post.author);
       };
       readerActions.appendChild(btnImg);
     }catch(e){}
