@@ -143,7 +143,7 @@
         var card = document.createElement('div');
         card.className = 'influencia-card';
         var ecosHtml = f.ecos.map(function(p){
-          return '<div class="influencia-eco" data-eco-id="' + p.id + '">✦ ' + esc(p.title) + ' <span style="color:var(--text-faint);font-size:.75rem;">· ' + f.ecos.length + ' coincidencias</span></div>';
+          return '<div class="influencia-eco" data-eco-id="' + p.id + '">✦ ' + esc(p.title) + '</div>';
         }).join('');
         card.innerHTML =
           '<h4>' + esc(f.nombre) + '</h4>' +
@@ -151,7 +151,6 @@
           '<div class="influencia-ecos">' + ecosHtml + '</div>';
         cont.appendChild(card);
       });
-      // Click en ecos
       cont.querySelectorAll('.influencia-eco').forEach(function(el){
         el.onclick = function(){
           var id = el.getAttribute('data-eco-id');
@@ -184,14 +183,12 @@
       autores[p.author] = (autores[p.author] || 0) + 1;
     });
 
-    // Top 5 ecos por score
     var ordenados = delMes.slice().sort(function(a,b){
       var sA = (a.views||0) + (a.likes||0)*3 + (a.comments?a.comments.length:0)*5;
       var sB = (b.views||0) + (b.likes||0)*3 + (b.comments?b.comments.length:0)*5;
       return sB - sA;
     }).slice(0, 5);
 
-    // Aforismo top
     var aforismoTop = '';
     if(typeof aforismos !== 'undefined' && aforismos.length){
       var afTop = aforismos.slice().reverse().find(function(a){
@@ -200,7 +197,6 @@
       if(afTop) aforismoTop = afTop.text;
     }
 
-    // Debates (ecos con más de 2 comentarios)
     var debates = delMes.filter(function(p){
       return (p.comments && p.comments.length >= 2);
     }).slice(0, 3).map(function(p){
@@ -225,7 +221,6 @@
     var datos = calcularResumen();
     if(!datos){ toast('No hay datos suficientes'); return; }
 
-    // Crear modal
     var overlay = document.createElement('div');
     overlay.className = 'resumen-modal show';
     overlay.innerHTML = '<div class="resumen-box"><button class="cerrar">✕</button><h3>✦ Resumen mensual — ' + datos.mes + ' ' + datos.anio + '</h3><div class="contenido"><div style="color:var(--accent);font-style:italic;padding:1rem 0">Generando previsualización…</div></div></div>';
@@ -233,7 +228,6 @@
     overlay.onclick = function(e){ if(e.target === overlay) overlay.remove(); };
     document.body.appendChild(overlay);
 
-    // Llamar al backend para generar HTML
     fetch('/api/resumen-mensual', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -262,7 +256,6 @@
   }
 
   async function enviarResumen(datos, overlay){
-    // Obtener lista de destinatarios (solo los que tienen correo y aceptaron)
     var destinatarios = [];
     try{
       if(typeof supabaseClient !== 'undefined' && supabaseClient){
@@ -326,7 +319,7 @@
 
     // Botones en el nav
     var nav = document.querySelector('nav');
-    if(nav && !nav.dataset.iaFinal === 'true'){
+    if(nav){
       if(!document.getElementById('btnInfluenciasExt')){
         var bi = document.createElement('button');
         bi.id = 'btnInfluenciasExt';
@@ -360,4 +353,5 @@
     detectarInfluencias: detectarInfluencias,
     calcularResumen: calcularResumen
   };
+
 })();
