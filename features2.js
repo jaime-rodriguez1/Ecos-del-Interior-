@@ -1,7 +1,7 @@
 /* ============================================
    ECOS DEL INTERIOR — Features Extendidas Fase B
    Marcadores, Notas, Reacciones, Seguir,
-   Ranking, Búsqueda, Anuncios
+   Ranking, Búsqueda, Anuncios (Supabase)
    ============================================ */
 
 (function(){
@@ -26,11 +26,11 @@
       '.anuncio{background:linear-gradient(135deg,rgba(201,162,39,.15),rgba(201,162,39,.05));border:1px solid var(--accent);border-radius:14px;padding:1rem 1.2rem;position:relative}',
       '.anuncio.urgente{background:linear-gradient(135deg,rgba(194,91,91,.15),rgba(194,91,91,.05));border-color:var(--danger)}',
       '.anuncio.evento{background:linear-gradient(135deg,rgba(122,158,201,.15),rgba(122,158,201,.05));border-color:#7a9ec9}',
-      '.anuncio h4{font-family:var(--font-serif);font-size:1.05rem;font-weight:400;color:var(--accent);margin-bottom:.35rem}',
+      '.anuncio h4{font-family:var(--font-serif);font-size:1.05rem;font-weight:400;color:var(--accent);margin-bottom:.35rem;padding-right:3rem}',
       '.anuncio.urgente h4{color:var(--danger)}',
       '.anuncio.evento h4{color:#7a9ec9}',
-      '.anuncio p{font-size:.9rem;color:var(--text-dim);line-height:1.6;margin:0}',
-      '.anuncio .cerrar{position:absolute;top:.6rem;right:.7rem;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:.9rem;padding:.2rem .4rem;border-radius:4px}',
+      '.anuncio p{font-size:.9rem;color:var(--text-dim);line-height:1.6;margin:0;padding-right:3rem}',
+      '.anuncio .cerrar{position:absolute;top:.6rem;right:.7rem;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:.9rem;padding:.2rem .4rem;border-radius:4px;transition:all .2s}',
       '.anuncio .cerrar:hover{color:var(--danger);background:rgba(194,91,91,.1)}',
       '.notas-panel{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-top:1rem}',
       '.notas-panel textarea{width:100%;min-height:100px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.7rem;font-size:.9rem;font-family:var(--font-sans);resize:vertical}',
@@ -53,7 +53,7 @@
       '.ranking-info{flex:1;min-width:0}',
       '.ranking-title{font-family:var(--font-serif);font-size:1rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
       '.ranking-meta{font-size:.72rem;color:var(--text-faint);margin-top:2px}',
-      '.ranking-stats{font-size:.78rem;color:var(--accent);font-weight:600}',
+      '.ranking-stats{font-size:.78rem;color:var(--accent);font-weight:600;text-align:right;line-height:1.4}',
       '.admin-anuncio-form{display:none;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:1.2rem;margin-bottom:1rem}',
       '.admin-anuncio-form.activo{display:block}',
       '.admin-anuncio-form h4{font-family:var(--font-serif);font-size:1rem;color:var(--accent);margin-bottom:.8rem}',
@@ -119,7 +119,6 @@
     renderEmojiBar();
   }
   function contarReaccion(ecoId, emoji){
-    // Reacción propia (1 si el usuario la eligió, 0 si no)
     var r = getReacciones();
     return (r[ecoId] && r[ecoId][emoji]) ? 1 : 0;
   }
@@ -173,11 +172,12 @@
   function getRankingSemanal(){
     if(typeof posts === 'undefined') return [];
     var ahora = Date.now();
-    var unaSemana = 7 * 24 * 60 * 60 * 1000;
+    var unMes = 30 * 24 * 60 * 60 * 1000;
     var recientes = posts.filter(function(p){
       var fecha = new Date(p.date + 'T00:00:00').getTime();
-      return (ahora - fecha) < unaSemana * 4; // Últimas 4 semanas por si acaso
+      return (ahora - fecha) < unMes;
     });
+    if(recientes.length === 0) recientes = posts.slice();
     recientes.sort(function(a,b){
       var scoreA = (a.views||0) + (a.likes||0)*3 + (a.comments?a.comments.length:0)*5;
       var scoreB = (b.views||0) + (b.likes||0)*3 + (b.comments?b.comments.length:0)*5;
@@ -192,30 +192,16 @@
   var busquedaActual = '';
   var ordenActual = 'recientes';
 
-  function aplicarBusquedaYOrden(){
-    if(typeof posts === 'undefined' || typeof renderPosts !== 'function') return;
-
-    // Guardamos el estado original una sola vez
-    if(!window._ecosOriginalRender){
-      window._ecosOriginalRender = renderPosts;
-    }
-
-    // Filtramos/ordenamos los posts
-    var original = window._ecosOriginalRender;
-    // Simplemente reordenamos el array posts antes de que se renderice
-    // (Esto es más limpio: interceptar el render)
-  }
-
   function filtrarYOrdenarPosts(){
-    if(typeof posts === 'undefined') return posts;
+    if(typeof posts === 'undefined') return [];
     var q = busquedaActual.trim().toLowerCase();
     var filtrados = posts;
     if(q){
       filtrados = posts.filter(function(p){
-        return (p.title||'').toLowerCase().includes(q) ||
-               (p.content||'').toLowerCase().includes(q) ||
-               (p.author||'').toLowerCase().includes(q) ||
-               (p.tag||'').toLowerCase().includes(q);
+        return (p.title||'').toLowerCase().indexOf(q) !== -1 ||
+               (p.content||'').toLowerCase().indexOf(q) !== -1 ||
+               (p.author||'').toLowerCase().indexOf(q) !== -1 ||
+               (p.tag||'').toLowerCase().indexOf(q) !== -1;
       });
     }
     var ordenados = filtrados.slice();
@@ -234,29 +220,73 @@
   }
 
   /* ============================================
-     7. ANUNCIOS DEL ADMIN
+     7. ANUNCIOS DEL ADMIN (con Supabase)
      ============================================ */
-  function getAnuncios(){ return getLS('ecos_anuncios', []); }
-  function setAnuncios(arr){ setLS('ecos_anuncios', arr); }
-  function publicarAnuncio(titulo, contenido, prioridad){
-    var arr = getAnuncios();
-    arr.unshift({
-      id: 'an-' + Date.now(),
-      titulo: titulo,
-      contenido: contenido,
-      prioridad: prioridad || 'normal',
-      fecha: new Date().toISOString().slice(0,10)
-    });
-    setAnuncios(arr);
-    renderAnuncios();
-    toast('Anuncio publicado ✓');
+  var anunciosCache = [];
+
+  async function cargarAnunciosDesdeSupabase(){
+    try{
+      if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
+      var resultado = await supabaseClient
+        .from('announcements')
+        .select('*')
+        .eq('active', true)
+        .order('created_at', {ascending:false});
+      if(resultado.error){
+        console.warn('Error cargando anuncios:', resultado.error);
+        return;
+      }
+      anunciosCache = resultado.data || [];
+      renderAnuncios();
+    }catch(e){ console.warn('cargarAnuncios error:', e); }
   }
-  function eliminarAnuncio(id){
+
+  async function publicarAnuncio(titulo, contenido, prioridad){
+    try{
+      if(typeof supabaseClient === 'undefined' || !supabaseClient){
+        toast('Supabase no disponible');
+        return;
+      }
+      var resultado = await supabaseClient
+        .from('announcements')
+        .insert({
+          title: titulo,
+          content: contenido,
+          priority: prioridad || 'normal',
+          active: true
+        })
+        .select()
+        .single();
+      if(resultado.error){
+        console.warn('Error publicando anuncio:', resultado.error);
+        toast('Error al publicar: ' + resultado.error.message);
+        return;
+      }
+      toast('Anuncio publicado ✓');
+      await cargarAnunciosDesdeSupabase();
+    }catch(e){
+      console.warn(e);
+      toast('Error de conexión');
+    }
+  }
+
+  async function eliminarAnuncio(id){
     if(!confirm('¿Eliminar este anuncio?')) return;
-    var arr = getAnuncios().filter(function(a){ return a.id !== id; });
-    setAnuncios(arr);
-    renderAnuncios();
+    try{
+      if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
+      var resultado = await supabaseClient
+        .from('announcements')
+        .delete()
+        .eq('id', id);
+      if(resultado.error){
+        toast('Error al eliminar: ' + resultado.error.message);
+        return;
+      }
+      toast('Anuncio eliminado');
+      await cargarAnunciosDesdeSupabase();
+    }catch(e){ console.warn(e); }
   }
+
   function getAnunciosCerrados(){ return getLS('ecos_anuncios_cerrados', []); }
   function cerrarAnuncio(id){
     var arr = getAnunciosCerrados();
@@ -268,28 +298,43 @@
   function renderAnuncios(){
     var cont = document.getElementById('bannerAnunciosExt');
     if(!cont) return;
-    var anuncios = getAnuncios();
     var cerrados = getAnunciosCerrados();
-    var visibles = anuncios.filter(function(a){ return cerrados.indexOf(a.id) === -1; });
+    var visibles = anunciosCache.filter(function(a){ return cerrados.indexOf(a.id) === -1; });
 
     cont.innerHTML = '';
     if(visibles.length === 0) return;
 
     visibles.forEach(function(a){
       var div = document.createElement('div');
-      div.className = 'anuncio ' + (a.prioridad || 'normal');
+      div.className = 'anuncio ' + (a.priority || 'normal');
+
+      // Botón cerrar (para todos)
       var cerrar = document.createElement('button');
       cerrar.className = 'cerrar';
       cerrar.textContent = '✕';
       cerrar.title = 'Ocultar';
       cerrar.onclick = function(){ cerrarAnuncio(a.id); };
       div.appendChild(cerrar);
+
+      // Botón eliminar (solo admin)
+      if(typeof currentRole !== 'undefined' && currentRole === 'admin'){
+        var del = document.createElement('button');
+        del.className = 'cerrar';
+        del.style.right = '2.2rem';
+        del.textContent = '🗑';
+        del.title = 'Eliminar (admin)';
+        del.onclick = function(e){ e.stopPropagation(); eliminarAnuncio(a.id); };
+        div.appendChild(del);
+      }
+
       var h4 = document.createElement('h4');
-      h4.textContent = a.titulo;
+      h4.textContent = a.title;
       div.appendChild(h4);
+
       var p = document.createElement('p');
-      p.textContent = a.contenido;
+      p.textContent = a.content;
       div.appendChild(p);
+
       cont.appendChild(div);
     });
   }
@@ -297,7 +342,6 @@
   /* ============================================
      8. INYECCIÓN DE ELEMENTOS EN EL LECTOR
      ============================================ */
-  var inyectado = false;
   function inyectarElementosLector(){
     var readerActions = document.getElementById('readerActions');
     if(!readerActions) return;
@@ -327,29 +371,7 @@
       readerActions.appendChild(btnS);
     }
 
-    // Barra de emojis
-    var readerStats = document.getElementById('readerStats');
-    if(readerStats && !document.getElementById('emojiBarExt')){
-      var bar = document.createElement('div');
-      bar.id = 'emojiBarExt';
-      bar.className = 'emoji-bar';
-      readerStats.parentNode.insertBefore(bar, readerStats.nextSibling);
-    }
-
-    // Panel de notas
-    if(!document.getElementById('notasPanelExt')){
-      var readerContent = document.getElementById('readerContent');
-      if(readerContent){
-        var panel = document.createElement('div');
-        panel.id = 'notasPanelExt';
-        panel.className = 'notas-panel';
-        panel.style.display = 'none';
-        panel.innerHTML = '<div style="font-size:.85rem;color:var(--text-dim);margin-bottom:.5rem">📝 Notas privadas (solo tú las ves)</div><textarea id="notasTextoExt" placeholder="Escribe tus reflexiones sobre este eco..."></textarea><div class="notas-info">Se guardan automáticamente en este navegador.</div><div class="acciones"><button class="btn-ghost" id="btnCerrarNotas">Cerrar</button></div>';
-        readerContent.parentNode.appendChild(panel);
-      }
-    }
-
-    // Botón para abrir notas
+    // Botón Notas
     if(!document.getElementById('btnNotasExt')){
       var btnN = document.createElement('button');
       btnN.id = 'btnNotasExt';
@@ -371,7 +393,29 @@
       readerActions.appendChild(btnN);
     }
 
-    // Guardar notas al escribir
+    // Barra de emojis (después de readerStats)
+    var readerStats = document.getElementById('readerStats');
+    if(readerStats && !document.getElementById('emojiBarExt')){
+      var bar = document.createElement('div');
+      bar.id = 'emojiBarExt';
+      bar.className = 'emoji-bar';
+      readerStats.parentNode.insertBefore(bar, readerStats.nextSibling);
+    }
+
+    // Panel de notas (al final del reader-body)
+    if(!document.getElementById('notasPanelExt')){
+      var readerContent = document.getElementById('readerContent');
+      if(readerContent){
+        var panel = document.createElement('div');
+        panel.id = 'notasPanelExt';
+        panel.className = 'notas-panel';
+        panel.style.display = 'none';
+        panel.innerHTML = '<div style="font-size:.85rem;color:var(--text-dim);margin-bottom:.5rem">📝 Notas privadas (solo tú las ves)</div><textarea id="notasTextoExt" placeholder="Escribe tus reflexiones sobre este eco..."></textarea><div class="notas-info">Se guardan automáticamente en este navegador.</div><div class="acciones"><button class="btn-ghost" id="btnCerrarNotas">Cerrar</button></div>';
+        readerContent.parentNode.appendChild(panel);
+      }
+    }
+
+    // Bind de notas
     var ta = document.getElementById('notasTextoExt');
     if(ta && !ta.dataset.bound){
       ta.dataset.bound = '1';
@@ -390,7 +434,6 @@
       };
     }
 
-    // Actualizamos estados
     actualizarBotonMarcador();
     actualizarBotonSeguir();
     renderEmojiBar();
@@ -400,7 +443,7 @@
      9. INYECCIÓN DE ELEMENTOS EN EL FEED
      ============================================ */
   function inyectarElementosFeed(){
-    // Barra de anuncios arriba del feed
+    // Barra de anuncios
     if(!document.getElementById('bannerAnunciosExt')){
       var mainLayout = document.querySelector('.main-layout');
       if(mainLayout && mainLayout.parentNode){
@@ -408,11 +451,10 @@
         banner.id = 'bannerAnunciosExt';
         banner.className = 'banner-anuncios';
         mainLayout.parentNode.insertBefore(banner, mainLayout);
-        renderAnuncios();
       }
     }
 
-    // Barra de búsqueda arriba de los filtros
+    // Barra de búsqueda
     if(!document.getElementById('searchBarExt')){
       var filtersBar = document.getElementById('filtersBar');
       if(filtersBar && filtersBar.parentNode){
@@ -450,14 +492,15 @@
 
     // Formulario de anuncio (solo admin)
     if(typeof currentRole !== 'undefined' && currentRole === 'admin' && !document.getElementById('adminAnuncioFormExt')){
-      var banner = document.getElementById('bannerAnunciosExt');
-      if(banner){
+      var banner2 = document.getElementById('bannerAnunciosExt');
+      if(banner2 && banner2.parentNode){
         var form = document.createElement('div');
         form.id = 'adminAnuncioFormExt';
         form.className = 'admin-anuncio-form';
         form.innerHTML = '<h4>✎ Publicar anuncio (solo admin)</h4><input id="anTitulo" placeholder="Título del anuncio" maxlength="80"><textarea id="anContenido" placeholder="Contenido del anuncio..." maxlength="500"></textarea><select id="anPrioridad"><option value="normal">Normal</option><option value="urgente">Urgente</option><option value="evento">Evento</option></select><div class="acciones"><button class="btn-ghost" id="btnCerrarAnuncioForm">Cancelar</button><button class="btn-primary" id="btnPublicarAnuncio">Publicar</button></div>';
-        banner.parentNode.insertBefore(form, banner.nextSibling);
+        banner2.parentNode.insertBefore(form, banner2.nextSibling);
       }
+
       // Botón para abrir formulario
       if(!document.getElementById('btnAbrirAnuncioForm')){
         var nav = document.querySelector('nav');
@@ -473,21 +516,24 @@
           nav.insertBefore(b, nav.firstChild);
         }
       }
-      // Bind de botones
+
+      // Bind publicar
       var btnPub = document.getElementById('btnPublicarAnuncio');
       if(btnPub && !btnPub.dataset.bound){
         btnPub.dataset.bound = '1';
-        btnPub.onclick = function(){
+        btnPub.onclick = async function(){
           var t = document.getElementById('anTitulo').value.trim();
           var c = document.getElementById('anContenido').value.trim();
           var p = document.getElementById('anPrioridad').value;
           if(!t || !c){ toast('Título y contenido obligatorios'); return; }
-          publicarAnuncio(t, c, p);
+          await publicarAnuncio(t, c, p);
           document.getElementById('anTitulo').value = '';
           document.getElementById('anContenido').value = '';
           document.getElementById('adminAnuncioFormExt').classList.remove('activo');
         };
       }
+
+      // Bind cerrar formulario
       var btnCerrarF = document.getElementById('btnCerrarAnuncioForm');
       if(btnCerrarF && !btnCerrarF.dataset.bound){
         btnCerrarF.dataset.bound = '1';
@@ -529,11 +575,6 @@
   });
 
   function aplicarBusqueda(){
-    // Reemplazamos temporalmente la función renderPosts
-    if(typeof window.renderPosts !== 'function') return;
-    var original = window._ecosOriginalRenderFn || window.renderPosts;
-    if(!window._ecosOriginalRenderFn) window._ecosOriginalRenderFn = original;
-
     var grid = document.getElementById('postsGrid');
     if(!grid) return;
     grid.innerHTML = '';
@@ -599,7 +640,6 @@
       });
     }
     panel.classList.add('activo');
-    // Cerramos ranking si estaba abierto
     var rp = document.getElementById('rankingPanelExt');
     if(rp) rp.classList.remove('activo');
     panel.scrollIntoView({behavior:'smooth', block:'start'});
@@ -656,8 +696,10 @@
     try{
       setTimeout(function(){
         inyectarElementosFeed();
-        renderAnuncios();
+        cargarAnunciosDesdeSupabase();
       }, 1200);
+      // Recargar anuncios cada 60 segundos (por si el admin publica uno nuevo)
+      setInterval(cargarAnunciosDesdeSupabase, 60000);
     }catch(e){}
   }
 
@@ -672,8 +714,10 @@
     toggleSeguir: toggleSeguir,
     toggleReaccion: toggleReaccion,
     publicarAnuncio: publicarAnuncio,
+    eliminarAnuncio: eliminarAnuncio,
     abrirBiblioteca: abrirBiblioteca,
-    abrirRanking: abrirRanking
+    abrirRanking: abrirRanking,
+    cargarAnunciosDesdeSupabase: cargarAnunciosDesdeSupabase
   };
 
 })();
