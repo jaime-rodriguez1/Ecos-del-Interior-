@@ -1,6 +1,7 @@
 /* ============================================
    ECOS DEL INTERIOR — Fase C final
    Resumen mensual + Mapa de influencias
+   (Influencias al final de la página)
    ============================================ */
 
 (function(){
@@ -26,7 +27,7 @@
       '.resumen-box .cerrar{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-size:1rem;display:grid;place-items:center}',
       '.resumen-preview{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;margin-bottom:1rem}',
       '.resumen-preview iframe{width:100%;height:400px;border:none;display:block}',
-      '.influencias-panel{max-width:1500px;margin:0 auto 2rem;padding:0 1.5rem;display:none}',
+      '.influencias-panel{max-width:1500px;margin:2rem auto;padding:0 1.5rem;display:none}',
       '.influencias-panel.activo{display:block}',
       '.influencia-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1rem}',
       '.influencia-card h4{font-family:var(--font-serif);font-size:1.15rem;color:var(--accent);margin-bottom:.3rem;font-weight:400}',
@@ -301,15 +302,15 @@
      4. INYECCIÓN DE ELEMENTOS EN EL FEED
      ============================================ */
   function inyectarElementos(){
-    // Panel de influencias
+    // Panel de influencias → AHORA SE INSERTA ANTES DEL FOOTER
     if(!document.getElementById('influenciasPanelExt')){
-      var mainLayout = document.querySelector('.main-layout');
-      if(mainLayout && mainLayout.parentNode){
+      var footer = document.querySelector('footer');
+      if(footer && footer.parentNode){
         var panel = document.createElement('div');
         panel.id = 'influenciasPanelExt';
         panel.className = 'influencias-panel';
         panel.innerHTML = '<div class="biblioteca-header"><h2>🧭 Mapa de influencias</h2><button class="biblioteca-close" id="btnCerrarInfluencias">✕ Cerrar</button></div><div id="influenciasContenido"></div>';
-        mainLayout.parentNode.insertBefore(panel, mainLayout);
+        footer.parentNode.insertBefore(panel, footer);
         setTimeout(function(){
           var btnC = document.getElementById('btnCerrarInfluencias');
           if(btnC) btnC.onclick = function(){ panel.classList.remove('activo'); };
