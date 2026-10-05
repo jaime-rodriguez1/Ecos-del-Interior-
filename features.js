@@ -1,5 +1,6 @@
 /* ============================================
-   ECOS DEL INTERIOR — Features Extendidas v4
+   ECOS DEL INTERIOR — Features Extendidas v5
+   Modo por hora con 4 estados (dawn/day/dusk/night)
    ============================================ */
 
 (function(){
@@ -259,16 +260,39 @@
   }
 
   // ============================================
-  // 6. MODO POR HORA
+  // 6. MODO POR HORA (4 ESTADOS)
+  // dawn · day · dusk · night
   // ============================================
   function aplicarModoPorHora(){
     try{
+      // Si el usuario eligió tema manualmente, respetar su elección
       if(localStorage.getItem('ecos_theme_manual') === 'true') return;
-      var h = new Date().getHours();
-      var tema = (h >= 7 && h < 19) ? 'light' : 'dark';
+
+      // El navegador ya respeta la zona horaria local del usuario
+      var ahora = new Date();
+      var h = ahora.getHours();
+      var m = ahora.getMinutes();
+      var horaDecimal = h + m / 60;
+
+      // Determinar tema e ícono según franja horaria
+      var tema, icono;
+      if(horaDecimal >= 5 && horaDecimal < 9){
+        tema = 'dawn';   // 🌄 Amanecer: 05:00 → 08:59
+        icono = '🌄';
+      } else if(horaDecimal >= 9 && horaDecimal < 17){
+        tema = 'day';    // ☀️ Día: 09:00 → 16:59
+        icono = '☀️';
+      } else if(horaDecimal >= 17 && horaDecimal < 20){
+        tema = 'dusk';   // 🌇 Atardecer: 17:00 → 19:59
+        icono = '🌇';
+      } else {
+        tema = 'night';  // 🌙 Noche: 20:00 → 04:59
+        icono = '🌙';
+      }
+
       document.documentElement.setAttribute('data-theme', tema);
       var tt = document.getElementById('themeToggle');
-      if(tt) tt.textContent = tema === 'dark' ? '🌙' : '☀️';
+      if(tt) tt.textContent = icono;
     }catch(e){}
   }
 
@@ -368,7 +392,6 @@
           post = posts.find(function(p){ return p.id === currentPostId; });
         }
         if(!post) return;
-        // Enviar TÍTULO, CONTENIDO y AUTOR
         compartirImagen(post.title, post.content, post.author);
       };
       readerActions.appendChild(btnImg);
@@ -465,7 +488,20 @@
     try{
       aplicarModoPorHora();
       registrarActividad('visita');
-      setInterval(aplicarModoPorHora, 30*60*1000);
+
+      // Verificar cada minuto (barato computacionalmente y preciso)
+      setInterval(aplicarModoPorHora, 60 * 1000);
+
+      // Re-verificar cuando el usuario vuelve a la pestaña
+      document.addEventListener('visibilitychange', function(){
+        if(!document.hidden) aplicarModoPorHora();
+      });
+
+      // Re-verificar cuando la ventana recupera el foco
+      window.addEventListener('focus', function(){
+        aplicarModoPorHora();
+      });
+
       setTimeout(function(){ desbloquearLogro('primer_paso'); }, 1500);
     }catch(e){}
   }
@@ -481,7 +517,8 @@
     toggleTTS: toggleTTS,
     compartirImagen: compartirImagen,
     desbloquearLogro: desbloquearLogro,
-    eliminarAforismo: eliminarAforismo
+    eliminarAforismo: eliminarAforismo,
+    aplicarModoPorHora: aplicarModoPorHora
   };
 
 })();
