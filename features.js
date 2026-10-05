@@ -1,5 +1,5 @@
 /* ============================================
-   ECOS DEL INTERIOR — Features Extendidas v2
+   ECOS DEL INTERIOR — Features Extendidas v3
    Usa setInterval en vez de MutationObserver
    para evitar congelar el navegador.
    ============================================ */
@@ -53,15 +53,33 @@
     }catch(e){}
   }
 
-  // Estilos
+  // ============================================
+  // 2. ESTILOS GLOBALES
+  // ============================================
   try{
     var st = document.createElement('style');
-    st.textContent = '@keyframes slideInLogro{from{opacity:0;transform:translateX(120%)}to{opacity:1;transform:translateX(0)}}@keyframes slideOutLogro{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(120%)}}.modal.zen-mode .reader-cover,.modal.zen-mode .reader-meta,.modal.zen-mode .reader-stats,.modal.zen-mode .comments-section,.modal.zen-mode .reader-actions,.modal.zen-mode .modal-close{display:none!important}.modal.zen-mode{max-width:720px;background:#0a0a0c;border-color:rgba(201,162,39,.3);margin-top:2rem!important;margin-bottom:2rem!important;max-height:calc(100vh - 4rem)!important;overflow-y:auto}.modal.zen-mode .reader-body{padding:5rem 3rem 4rem}.modal.zen-mode .reader-title{font-size:clamp(1.8rem,5vw,2.6rem);text-align:center;margin-bottom:2rem;padding-top:.5rem}.modal.zen-mode .reader-content{font-size:1.2rem;line-height:2;max-width:600px;margin:0 auto;color:#e8e6e1}.zen-close-btn{position:fixed;top:1.2rem;right:1.2rem;width:44px;height:44px;border-radius:50%;background:rgba(10,10,12,.9);border:1px solid rgba(201,162,39,.5);color:#c9a227;font-size:1.3rem;cursor:pointer;display:grid;place-items:center;z-index:10000;transition:all .3s;font-family:Arial,sans-serif;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent}.zen-close-btn:hover{background:rgba(201,162,39,.2);border-color:#c9a227;transform:rotate(90deg) scale(1.08)}.zen-close-btn:active{transform:rotate(90deg) scale(.95)}';
+    st.textContent = [
+      '@keyframes slideInLogro{from{opacity:0;transform:translateX(120%)}to{opacity:1;transform:translateX(0)}}',
+      '@keyframes slideOutLogro{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(120%)}}',
+      '.modal.zen-mode .reader-cover,',
+      '.modal.zen-mode .reader-meta,',
+      '.modal.zen-mode .reader-stats,',
+      '.modal.zen-mode .comments-section,',
+      '.modal.zen-mode .reader-actions,',
+      '.modal.zen-mode .modal-close{display:none!important}',
+      '.modal.zen-mode{max-width:720px;background:#0a0a0c;border-color:rgba(201,162,39,.3);margin-top:2rem!important;margin-bottom:2rem!important;max-height:calc(100vh - 4rem)!important;overflow-y:auto}',
+      '.modal.zen-mode .reader-body{padding:5rem 3rem 4rem}',
+      '.modal.zen-mode .reader-title{font-size:clamp(1.8rem,5vw,2.6rem);text-align:center;margin-bottom:2rem;padding-top:.5rem}',
+      '.modal.zen-mode .reader-content{font-size:1.2rem;line-height:2;max-width:600px;margin:0 auto;color:#e8e6e1}',
+      '.zen-close-btn{position:fixed;top:1.2rem;right:1.2rem;width:44px;height:44px;border-radius:50%;background:rgba(10,10,12,.9);border:1px solid rgba(201,162,39,.5);color:#c9a227;font-size:1.3rem;cursor:pointer;display:grid;place-items:center;z-index:10000;transition:all .3s;font-family:Arial,sans-serif;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent}',
+      '.zen-close-btn:hover{background:rgba(201,162,39,.2);border-color:#c9a227;transform:rotate(90deg) scale(1.08)}',
+      '.zen-close-btn:active{transform:rotate(90deg) scale(.95)}'
+    ].join('');
     document.head.appendChild(st);
   }catch(e){}
 
   // ============================================
-  // 2. MODO ZEN
+  // 3. MODO ZEN
   // ============================================
   function toggleModoZen(){
     try{
@@ -69,12 +87,29 @@
       if(!reader) return;
       var yaZen = reader.classList.contains('zen-mode');
       reader.classList.toggle('zen-mode');
-      if(!yaZen) desbloquearLogro('zen');
+      if(!yaZen){
+        desbloquearLogro('zen');
+        if(!document.getElementById('zenCloseBtn')){
+          var btn = document.createElement('button');
+          btn.id = 'zenCloseBtn';
+          btn.className = 'zen-close-btn';
+          btn.innerHTML = '✕';
+          btn.title = 'Salir del modo Zen';
+          btn.onclick = function(e){
+            e.stopPropagation();
+            toggleModoZen();
+          };
+          document.body.appendChild(btn);
+        }
+      } else {
+        var btnExistente = document.getElementById('zenCloseBtn');
+        if(btnExistente) btnExistente.remove();
+      }
     }catch(e){}
   }
 
   // ============================================
-  // 3. TTS
+  // 4. TTS
   // ============================================
   var ttsActivo = false;
   function toggleTTS(){
@@ -102,7 +137,7 @@
   }
 
   // ============================================
-  // 4. COMPARTIR IMAGEN
+  // 5. COMPARTIR IMAGEN
   // ============================================
   function compartirImagen(texto, autor){
     try{
@@ -139,7 +174,8 @@
       var maxWidth = 900, lineHeight = 70;
       var palabras = String(texto).split(' ');
       var lineas = [], linea = '';
-      for(var p of palabras){
+      for(var k=0;k<palabras.length;k++){
+        var p = palabras[k];
         var test = linea + p + ' ';
         if(ctx.measureText(test).width > maxWidth && linea !== ''){
           lineas.push(linea.trim()); linea = p + ' ';
@@ -174,7 +210,7 @@
   }
 
   // ============================================
-  // 5. MODO POR HORA
+  // 6. MODO POR HORA
   // ============================================
   function aplicarModoPorHora(){
     try{
@@ -188,7 +224,7 @@
   }
 
   // ============================================
-  // 6. ELIMINAR AFORISMO (admin)
+  // 7. ELIMINAR AFORISMO (admin)
   // ============================================
   function eliminarAforismo(id){
     if(!confirm('¿Eliminar este aforismo?')) return;
@@ -202,7 +238,7 @@
   }
 
   // ============================================
-  // 7. ACTIVIDAD
+  // 8. ACTIVIDAD
   // ============================================
   function registrarActividad(tipo){
     try{
@@ -227,7 +263,6 @@
       }
       if(tipo === 'mapa') desbloquearLogro('explorador');
 
-      // Racha
       var hoy = new Date().toISOString().slice(0,10);
       var ultima = localStorage.getItem('ecos_ultima_visita');
       var racha = parseInt(localStorage.getItem('ecos_racha')||'0');
@@ -245,14 +280,13 @@
         localStorage.setItem('ecos_ultima_visita', hoy);
       }
 
-      // Nocturno
       var h = new Date().getHours();
-      if(h >= 0 && h < 5 && tipo === 'lectura') desbloquearLogro('noculturno');
+      if(h >= 0 && h < 5 && tipo === 'lectura') desbloquearLogro('nocturno');
     }catch(e){}
   }
 
   // ============================================
-  // 8. DETECCIÓN DEL LECTOR ABIERTO (polling)
+  // 9. INYECCIÓN DE BOTONES EN EL LECTOR
   // ============================================
   var readerAbierto = false;
 
@@ -305,13 +339,15 @@
       }
       var modal = document.querySelector('#readerOverlay .modal');
       if(modal) modal.classList.remove('zen-mode');
+      var btnZen = document.getElementById('zenCloseBtn');
+      if(btnZen) btnZen.remove();
       var ra = document.getElementById('readerActions');
       if(ra){ ra.dataset.extended = ''; }
     }catch(e){}
   }
 
   // ============================================
-  // 9. DETECCIÓN DE AFORISMOS PARA ADMIN (polling)
+  // 10. BOTONES ADMIN EN AFORISMOS
   // ============================================
   function actualizarBotonesAdminEnAforismos(){
     try{
@@ -343,7 +379,7 @@
   }
 
   // ============================================
-  // 10. LOOP PRINCIPAL (cada 800ms)
+  // 11. LOOP PRINCIPAL
   // ============================================
   setInterval(function(){
     try{
@@ -365,7 +401,7 @@
   }, 800);
 
   // ============================================
-  // 11. CLIC EN MAPA (actividad)
+  // 12. CLICS GLOBALES
   // ============================================
   document.addEventListener('click', function(e){
     try{
@@ -379,7 +415,7 @@
   }, true);
 
   // ============================================
-  // 12. INICIALIZACIÓN
+  // 13. INICIALIZACIÓN
   // ============================================
   function init(){
     try{
